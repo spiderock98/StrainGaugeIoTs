@@ -68,20 +68,20 @@ io.on('connection', socket => {
     });
 });
 
-// nspStream.on('connection', socket => {
-//     console.log('Python Socket has connected');
-//     // redirect data stream 
-//     socket.on('stream', data => nspBrowser.emit('stream', data));
-// });
-
 nspStream.on('connection', socket => {
-    var decoded_image;
     console.log('Python Socket has connected');
     // redirect data stream 
-    socket.on('stream', data => {
-        decoded_image = 'data:image/jpg;base64,' + data;
-    });
+    socket.on('stream', data => nspBrowser.emit('stream', data));
 });
+
+// nspStream.on('connection', socket => {
+//     var decoded_image;
+//     console.log('Python Socket has connected');
+//     // redirect data stream 
+//     socket.on('stream', data => {
+//         decoded_image = 'data:image/jpg;base64,' + data;
+//     });
+// });
 
 
 nspBrowser.on('connection', socket => {

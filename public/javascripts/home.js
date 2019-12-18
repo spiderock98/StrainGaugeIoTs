@@ -174,7 +174,7 @@ function initMap() {
     marker.setMap(map);
 
     socketBrowser.on('stream', data => {
-        var decoded_image = 'data:image/jpg;base64,' + data;
-        marker.setIcon(decoded_image);
+        // var decoded_image = 'data:image/jpg;base64,' + data;
+        marker.setIcon('data:image/jpg;base64,' + data);
     });
 }
