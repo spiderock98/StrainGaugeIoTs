@@ -55,5 +55,6 @@ def disconnect():
 
 # sio.connect('https://stream-opencv.herokuapp.com')
 # sio.connect('http://localhost:8080/', namespaces=['/VideoStream'])
+# sio.connect('http://27.78.42.155:8080/', namespaces=['/VideoStream'])
 sio.connect('http://52.230.11.106:8080/', namespaces=['/VideoStream'])
 sio.wait()

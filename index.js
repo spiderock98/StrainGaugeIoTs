@@ -17,11 +17,12 @@ app.set('view engine', 'ejs')
 app.set('views', './views')
 
 // var url = require('url');
-var xlsx = require('xlsx');
-var firebase = require('firebase');
-var admin = require('firebase-admin');
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
+const xlsx = require('xlsx');
+const firebase = require('firebase');
+const admin = require('firebase-admin');
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+// const peerjs = require('peerjs');
 // var p2p = require('socket.io-p2p')
 // var player = require('play-sound')(opts = {});
 server.listen(8080);
@@ -68,20 +69,29 @@ io.on('connection', socket => {
     });
 });
 
-nspStream.on('connection', socket => {
-    console.log('Python Socket has connected');
-    // redirect data stream 
-    socket.on('stream', data => nspBrowser.emit('stream', data));
-});
+// const peer = new peerjs('lwjd5qra8257b9');
 
 // nspStream.on('connection', socket => {
-//     var decoded_image;
 //     console.log('Python Socket has connected');
 //     // redirect data stream 
-//     socket.on('stream', data => {
-//         decoded_image = 'data:image/jpg;base64,' + data;
-//     });
+//     socket.on('stream', data => nspBrowser.emit('stream', data));
 // });
+
+nspStream.on('connection', socket => {
+    var decoded_image;
+    var flagData = true;
+    console.log('Python Socket has connected');
+    // redirect data stream
+    if (flagData){
+        socket.on('stream', data => {
+            // decoded_image = 'data:image/jpg;base64,' + data;
+            // if (!varData) {varData = data;}
+            flagData = false;
+            nspBrowser.emit('stream', data);
+            flagData = true;
+        });
+    }
+});
 
 
 nspBrowser.on('connection', socket => {

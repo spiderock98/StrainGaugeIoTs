@@ -7,6 +7,7 @@ var fieldDashboard = document.getElementById('fieldDashboard');
 var fieldDevices = document.getElementById('fieldDevices');
 // var socket = io();
 var socketBrowser = io('/Browser');
+var peerjs = new Peer({key: 'lwjd5qra8257b9'});
 
 // PAGE ONLOAD FUNC
 
