@@ -59,10 +59,11 @@ btnLogin.addEventListener('click', function(){
     //     id: txtEmail.value,
     //     pass: txtPassword.value
     // },
-    // function(data, status){
+    // function(data, status) {
     //     console.log(status);
     //     window.location.href = '/home';
-    // });
+    // }
+    // );
 
     $.ajax({
         url: '/auth',
@@ -73,19 +74,8 @@ btnLogin.addEventListener('click', function(){
             pass: String(txtPassword.value)
         }),
         success: function(result,status){
-            window.alert(result);
+            // window.alert(result);
             window.location.href = '/home';
         }
     });
 });
-// btnLogin.addEventListener('click', function(){
-//     var xhttp = new XMLHttpRequest();
-//     xhttp.open("POST", "/auth/?" + "id=" + txtEmail.value + "&pass=" + txtPassword.value, true);
-//     xhttp.send();
-//     xhttp.onreadystatechange = function() {
-//         if (this.readyState == 4 && this.status == 200) {
-//             if(this.responseText === 'home') { window.location.href="/home"; }
-//             else{ window.alert(this.responseText); }
-//         }
-//     };
-// });

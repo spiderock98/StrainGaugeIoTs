@@ -45,7 +45,7 @@ var firebaseConfig = {
     appId: "1:799475033788:web:356bbc071b9b50c63452b9",
     measurementId: "G-7JYQ524WQY"
 };
-// Initialize Firebase 
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
 // Socket IO
@@ -71,28 +71,27 @@ io.on('connection', socket => {
 
 // const peer = new peerjs('lwjd5qra8257b9');
 
-// nspStream.on('connection', socket => {
-//     console.log('Python Socket has connected');
-//     // redirect data stream 
-//     socket.on('stream', data => nspBrowser.emit('stream', data));
-// });
-
 nspStream.on('connection', socket => {
-    var decoded_image;
-    var flagData = true;
     console.log('Python Socket has connected');
     // redirect data stream
-    if (flagData){
-        socket.on('stream', data => {
-            // decoded_image = 'data:image/jpg;base64,' + data;
-            // if (!varData) {varData = data;}
-            flagData = false;
-            nspBrowser.emit('stream', data);
-            flagData = true;
-        });
-    }
+    socket.on('stream', data => nspBrowser.emit('stream', data));
 });
 
+// nspStream.on('connection', socket => {
+//     var decoded_image;
+//     var flagData = true;
+//     console.log('Python Socket has connected');
+//     // redirect data stream
+//     if (flagData){
+//         socket.on('stream', data => {
+//             // decoded_image = 'data:image/jpg;base64,' + data;
+//             // if (!varData) {varData = data;}
+//             flagData = false;
+//             nspBrowser.emit('stream', data);
+//             flagData = true;
+//         });
+//     }
+// });
 
 nspBrowser.on('connection', socket => {
     socket.on('onload', () => {
@@ -154,10 +153,7 @@ app.post('/auth', (req, res) => {
     // console.log(req.body);
 
     firebase.auth().signInWithEmailAndPassword(req.body.id, req.body.pass).then(() => {
-        // var currentUser = firebase.auth().currentUser;
-        // res.send('Welcome ' + currentUser.email);
         res.send('Access Granted');
-        // res.download('javascripts/map_bypass.js');
     }).catch(err => { res.send(err.message) });
 });
 
