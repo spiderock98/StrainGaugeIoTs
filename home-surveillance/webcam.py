@@ -10,6 +10,7 @@ import time
 vs = VideoStream(0).start()
 sio = socketio.Client()
 frameSize = 300
+flagStream = False
 
 
 @sio.event(namespace='/VideoStream')
@@ -55,8 +56,7 @@ def connect():
 
         # draw the text and timestamp on the frame
         ts = timestamp.strftime("%A %d %B %Y %I:%M:%S%p")
-        cv2.putText(frame, "Room Status: {}".format(text), (10, 20),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        cv2.putText(frame, "Room Status: {}".format(text), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         cv2.putText(
             frame, ts, (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
@@ -73,39 +73,30 @@ def connect():
             motionCounter = 0
 
         _, dataImg = cv2.imencode('.jpg', frame)
-        # encoded_byte = base64.b64encode(dataImg)
-        sio.emit('stream', str(base64.b64encode(dataImg), 'utf-8'), namespace='/VideoStream')
-        if cv2.waitKey(1) == 27:
+        if flagStream:
+            sio.emit('stream', str(base64.b64encode(dataImg), 'utf-8'), namespace='/VideoStream')
+        if cv2.waitKey(100) == 27:
             break
     vs.stop()
-    # cv2.destroyAllWindows()
-
-# @sio.event
-# def onEvent(data):
-#     print(data)
-
 
 @sio.on('frameSize', namespace='/VideoStream')
 def on_message(value):
     global frameSize
     frameSize = int(value)
 
-#### Send image on local to server ####
-    # data = {}
-    # with open('iron.jpg', mode='rb') as file:
-    #     img = file.read()
-    # data['img'] = base64.encodebytes(img).decode("utf-8")
-    # print(type(data))
-    # sio.emit('repEvent', json.dumps(data))
+@sio.on('onload', namespace='/VideoStream')
+def on_message():
+    global flagStream
+    flagStream = True
+@sio.on('onunload', namespace='/VideoStream')
+def on_message():
+    global flagStream
+    flagStream = False
 
-
-@sio.event
+@sio.event(namespace='/VideoStream')
 def disconnect():
-    print('disconnected from server')
+    print('[INFO] Disconnected from server')
 
-
-# sio.connect('https://stream-opencv.herokuapp.com')
 # sio.connect('http://localhost:8080/', namespaces=['/VideoStream'])
 sio.connect('http://27.78.42.155:8080/', namespaces=['/VideoStream'])
-# sio.connect('http://52.230.11.106:8080/', namespaces=['/VideoStream'])
 sio.wait()

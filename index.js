@@ -73,9 +73,10 @@ io.on('connection', socket => {
 
 nspStream.on('connection', socket => {
     console.log('Python Socket has connected');
-    // redirect data stream
     socket.on('stream', data => nspBrowser.emit('stream', data));
 });
+
+///// FIX LAG PENDING /////
 
 // nspStream.on('connection', socket => {
 //     var decoded_image;
@@ -93,15 +94,19 @@ nspStream.on('connection', socket => {
 //     }
 // });
 
+// When home.ejs has been rendered
 nspBrowser.on('connection', socket => {
+    socket.on('disconnect', reason => nspStream.emit('onunload'));
+    
     socket.on('onload', () => {
         dbRef.once('value', snap => { socket.emit('onload', snap.val()); });
+        nspStream.emit('onload')
     });
 
     socket.on('frameSize', value => {
         nspStream.emit('frameSize', value);
         // console.log(value);
-    })
+    });
 
     socket.on('qrLog', () => {
         // crawl data then send to frontend 
@@ -134,7 +139,6 @@ nspBrowser.on('connection', socket => {
                 nspBrowser.emit('jsonXLSX', retArr);
             }
         });
-
     });
 });
 
