@@ -15,6 +15,7 @@ fieldDevices.addEventListener('click', () => window.location.href = '/devices');
 btnLogout.addEventListener('click', () => window.location.href = '/login');
 
 // jQuery Form Plugin
+// https://jquery-form.github.io/form/api/
 $(() => {
     var jsonData;
     $('#formCal').ajaxForm({
@@ -83,9 +84,8 @@ $(() => {
                     for (var i in jsonData) {
                         dbDate.setTime(i);
                         result.push([dbDate.toDateString(), parseInt(jsonData[i])]);
-                        if (dbDate.getDate() == qrDate.getDate()) { sortDate.push([dbDate.toTimeString(), parseInt(jsonData[i])]); }
+                        if ((dbDate.getDate() == qrDate.getDate()) && (dbDate.getMonth() == qrDate.getMonth())) { sortDate.push([dbDate.toTimeString(), parseInt(jsonData[i])]); }
                     }
-
                     data.addRows(sortDate);
                     chart.draw(data, options);
                     // });
@@ -130,17 +130,19 @@ function drawLine() {
     var chart = new google.visualization.AreaChart(document.getElementById('linechart'));
     chart.draw(data, options); // init
 
-    socketBrowser.emit('onload');
-    socketBrowser.once('onload', jsonData => {
-        var dbDate = new Date();
-        var sortDate = [];
-
-        for (var time in jsonData) {
-            dbDate.setTime(time);
-            sortDate.push([dbDate.toTimeString(), parseInt(jsonData[time])]);
+    $.ajax('/calendar', {
+        method: 'POST',
+        async: false,
+        success: jsonData => {
+            var dbDate = new Date();
+            var sortDate = [];
+            for (var time in jsonData) {
+                dbDate.setTime(time);
+                sortDate.push([dbDate.toTimeString(), parseInt(jsonData[time])]);
+            }
+            data.addRows(sortDate);
+            chart.draw(data, options);
         }
-        data.addRows(sortDate);
-        chart.draw(data, options);
     });
 
     socketBrowser.on('cloudVal', (time, log) => {
@@ -174,3 +176,8 @@ function initMap() {
         marker.setIcon('data:image/jpg;base64,' + data);
     });
 }
+
+// // jQuery Onload
+$(document).ready(() => {
+    socketBrowser.emit('onload')
+});

@@ -97,49 +97,10 @@ nspStream.on('connection', socket => {
 
 // When home.ejs has been rendered
 nspBrowser.on('connection', socket => {
-    // socket.on('disconnect', reason => nspStream.emit('onunload'));
-    
-    socket.on('onload', () => {
-        dbRef.once('value', snap => { socket.emit('onload', snap.val()); });
-        nspStream.emit('onload')
-    });
+    socket.on('onload', () => nspStream.emit('onload'));
 
     socket.on('frameSize', value => {
         nspStream.emit('frameSize', value);
-        // console.log(value);
-    });
-
-    socket.on('qrLog', () => {
-        // crawl data then send to frontend 
-        dbRef.once('value', snap => { nspBrowser.emit('jsCrawl', snap.val()); });
-    });
-
-    socket.on('download', date => {
-        var userDate = new Date(date);
-        dbRef.once('value', snap => {
-            var result = {};
-            var retArr = [];
-            jsonData = snap.val();
-
-            // crawl bunch of jsonData 
-            for (var time in jsonData) {
-                var qrDate = new Date();
-                qrDate.setTime(time);
-
-                if ((qrDate.getDate() == userDate.getDate()) && (qrDate.getMonth() == userDate.getMonth())) {
-                    result['time'] = time;
-                    result['sensor'] = jsonData[time];
-                    retArr.push(result);
-                    result = {};
-                }
-            }
-            console.log(retArr);
-
-            if (Object.keys(result).length != 0) {
-                // var myJSON  = JSON.stringify(result);
-                nspBrowser.emit('jsonXLSX', retArr);
-            }
-        });
     });
 });
 
@@ -152,11 +113,6 @@ app.get('/', (req, res) => {
 
 // wait for post auth
 app.post('/auth', (req, res) => {
-    // Init url and query variable
-    // var adr = url.parse(req.url, true);
-    // var qdata = adr.query;
-    // console.log(req.body);
-
     firebase.auth().signInWithEmailAndPassword(req.body.id, req.body.pass).then(() => {
         res.send('Access Granted');
     }).catch(err => { res.send(err.message) });
