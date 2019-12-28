@@ -52,7 +52,6 @@ document.querySelector('#submit').addEventListener('focus', function (e) {
     });
 });
 
-
 btnLogin.addEventListener('click', function(){
     // $.post('/auth', 
     // {

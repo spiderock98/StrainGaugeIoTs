@@ -99,4 +99,5 @@ def disconnect():
 
 # sio.connect('http://localhost:8080/', namespaces=['/VideoStream'])
 sio.connect('http://27.78.42.155:8080/', namespaces=['/VideoStream'])
+# sio.connect('https://spiderock.azurewebsites.net:80/', namespaces=['/VideoStream'])
 sio.wait()

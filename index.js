@@ -67,6 +67,7 @@ io.on('connection', socket => {
         // console.log(data.value);
         firebase.database().ref('/sensor1/logs').update(update);
     });
+    // socket.on('disconnect', () => console.log('see you again'));
 });
 
 // const peer = new peerjs('lwjd5qra8257b9');
@@ -96,7 +97,7 @@ nspStream.on('connection', socket => {
 
 // When home.ejs has been rendered
 nspBrowser.on('connection', socket => {
-    socket.on('disconnect', reason => nspStream.emit('onunload'));
+    // socket.on('disconnect', reason => nspStream.emit('onunload'));
     
     socket.on('onload', () => {
         dbRef.once('value', snap => { socket.emit('onload', snap.val()); });
@@ -175,17 +176,17 @@ firebase.auth().onAuthStateChanged(user => {
     });
 });
 
-// // Route logout
-// app.get('/logout', function(req, res){
-//     firebase.auth().signOut();
-//     res.send('logout');
-//     app.get('/login', function(req, res, next){
-//         res.render('login');
-//     });
-// });
-
 // Route logout
 app.get('/login', (req, res) => {
     firebase.auth().signOut();
     res.render('login');
+});
+
+app.post('/calendar', (req, res) => {
+    if (req.body.download) {
+        dbRef.once('value', snap => { res.status(201).send(snap.val()); });
+    }
+    else {
+        dbRef.once('value', snap => { res.status(202).send(snap.val()); });
+    }
 });

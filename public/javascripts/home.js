@@ -1,13 +1,10 @@
 var btnLogout = document.getElementById('btnLogout');
-var btnDate = document.getElementById('btnDate');
 var spinbox = document.getElementById("spinbox");
-var btnDownload = document.getElementById('btnDownload');
 var qrLog = document.getElementById('qrLog');
 var fieldDashboard = document.getElementById('fieldDashboard');
 var fieldDevices = document.getElementById('fieldDevices');
 
 var socketBrowser = io('/Browser');
-// var peerjs = new Peer({key: 'lwjd5qra8257b9'});
 
 // ELEMENTS
 
@@ -17,80 +14,84 @@ fieldDevices.addEventListener('click', () => window.location.href = '/devices');
 
 btnLogout.addEventListener('click', () => window.location.href = '/login');
 
-btnDate.addEventListener('click', () => {
-    // var d = new Date(qrLog.value);
-    // d.setTime(Date.parse(qrLog.value));
-    // console.log(qrLog.value);
-    socketBrowser.emit('qrLog');
-    // PIE CHART 
-    google.charts.load("current", { packages: ["corechart"] });
-    google.charts.setOnLoadCallback(drawPie);
-    function drawPie() {
-        var data = google.visualization.arrayToDataTable([
-            ['Time in day', 'Counter'],
-            [String(), Number()],
-        ]);
+// jQuery Form Plugin
+$(() => {
+    var jsonData;
+    $('#formCal').ajaxForm({
+        success: data => {
+            jsonData = data;
+        },
+        statusCode: {
+            201: () => {
+                console.log('201 download found');
+                // console.log(jsonData);
+                var userDate = new Date(qrLog.value);
+                var result = {};
+                var retArr = [];
 
-        var options = {
-            title: 'Daily Log',
-            is3D: true,
-            width: 900,
-            height: 450,
-        };
+                for (var time in jsonData) {
+                    var qrDate = new Date();
+                    qrDate.setTime(time);
 
-        var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
-        chart.draw(data, options);
+                    if ((qrDate.getDate() == userDate.getDate()) && (qrDate.getMonth() == userDate.getMonth())) {
+                        result['time'] = qrDate;
+                        result['sensor'] = jsonData[time];
+                        retArr.push(result);
+                        result = {};
+                    }
+                }
 
-        socketBrowser.once('jsCrawl', jsonData => {
-            var result = [];
-            var sortDate = [];
-            var qrDate = new Date(qrLog.value);
-            var dbDate = new Date();
+                if (retArr.length) {
+                    // new sheet from json
+                    var sheet = XLSX.utils.json_to_sheet(retArr);
+                    // new workbook
+                    var wb = XLSX.utils.book_new();
+                    // add sheet to workbook
+                    XLSX.utils.book_append_sheet(wb, sheet, 'data');
+                    // save wb
+                    XLSX.writeFile(wb, 'strain.xlsx');
+                }
+                else { window.alert('Nothing to Download ...'); }
+            },
+            202: () => {
+                console.log('202 log pie found');
+                // PIE CHART 
+                google.charts.load("current", { packages: ["corechart"] });
+                google.charts.setOnLoadCallback(drawPie);
+                function drawPie() {
+                    var data = google.visualization.arrayToDataTable([
+                        ['Time in day', 'Counter'],
+                        [String(), Number()],
+                    ]);
 
-            for (var i in jsonData) {
-                dbDate.setTime(i);
-                result.push([dbDate.toDateString(), parseInt(jsonData[i])]);
-                if (dbDate.getDate() == qrDate.getDate()) { sortDate.push([dbDate.toTimeString(), parseInt(jsonData[i])]); }
-            }
+                    var options = {
+                        title: 'Daily Log',
+                        is3D: true,
+                        width: 900,
+                        height: 450,
+                    };
 
-            data.addRows(sortDate);
-            chart.draw(data, options);
-        });
-    }
-});
+                    var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+                    // chart.draw(data, options);
 
-var i = 0;
-btnDownload.addEventListener('click', () => {
-    socketBrowser.emit('qrLog', qrLog.value);
-    socketBrowser.once('jsCrawl', jsonData => {
-        i++;
-        var userDate = new Date(qrLog.value);
-        var result = {};
-        var retArr = [];
+                    // socketBrowser.once('jsCrawl', jsonData => {
+                    var result = [];
+                    var sortDate = [];
+                    var qrDate = new Date(qrLog.value);
+                    var dbDate = new Date();
 
-        for (var time in jsonData) {
-            var qrDate = new Date();
-            qrDate.setTime(time);
+                    for (var i in jsonData) {
+                        dbDate.setTime(i);
+                        result.push([dbDate.toDateString(), parseInt(jsonData[i])]);
+                        if (dbDate.getDate() == qrDate.getDate()) { sortDate.push([dbDate.toTimeString(), parseInt(jsonData[i])]); }
+                    }
 
-            if ((qrDate.getDate() == userDate.getDate()) && (qrDate.getMonth() == userDate.getMonth())) {
-                result['time'] = qrDate;
-                result['sensor'] = jsonData[time];
-                retArr.push(result);
-                result = {};
+                    data.addRows(sortDate);
+                    chart.draw(data, options);
+                    // });
+                }
             }
         }
-
-        if (retArr.length) {
-            // new sheet from json
-            var sheet = XLSX.utils.json_to_sheet(retArr);
-            // new workbook
-            var wb = XLSX.utils.book_new();
-            // add sheet to workbook
-            XLSX.utils.book_append_sheet(wb, sheet, 'data');
-            // save wb
-            XLSX.writeFile(wb, 'strain.xlsx');
-        }
-        else { window.alert('Nothing to Download ...'); }
     });
 });
 
@@ -116,7 +117,7 @@ function drawLine() {
         // legend: { position: 'bottom' },
         // lineWidth: 4,
         chartArea: { width: '80%' },
-        animation: {"startup": true, duration: 1000, easing: 'out'},
+        animation: { "startup": true, duration: 1000, easing: 'out' },
 
         pointSize: 2,
         hAxis: { title: 'Time', titleTextStyle: { color: '#333' } },
