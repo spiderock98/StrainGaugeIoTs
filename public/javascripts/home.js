@@ -181,3 +181,6 @@ function initMap() {
 $(document).ready(() => {
     socketBrowser.emit('onload')
 });
+
+// const map2 = document.getElementById('map2');
+// map2.src = 

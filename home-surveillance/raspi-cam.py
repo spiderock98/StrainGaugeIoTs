@@ -11,8 +11,8 @@ vs = VideoStream(0).start()
 sio = socketio.Client()
 # frameSize = 300
 flagStream = False
-uniqueCameraID = 'acer'
-uniqueSensorID = 'sensor1' # to query database
+uniqueCameraID = 'raspi'
+uniqueSensorID = 'sensor2' # to query database
 authAccess = None
 
 @sio.event(namespace='/VideoStream')

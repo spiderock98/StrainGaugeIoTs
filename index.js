@@ -17,7 +17,7 @@ app.set('view engine', 'ejs')
 app.set('views', './views')
 
 // var url = require('url');
-const xlsx = require('xlsx');
+// const xlsx = require('xlsx');
 const firebase = require('firebase');
 const admin = require('firebase-admin');
 const server = require('http').Server(app);
@@ -74,7 +74,17 @@ io.on('connection', socket => {
 
 nspStream.on('connection', socket => {
     console.log('Python Socket has connected');
+    // if btn then which socket id can emit
     socket.on('stream', data => nspBrowser.emit('stream', data));
+    socket.on('auth', (queryCamID, password, uniqueSensorID) => {
+        var strDBRef = firebase.database().ref('/' + uniqueSensorID + '/camera')
+        strDBRef.once('value', snap => {
+            if ((snap.val().id == queryCamID) && (snap.val().pass == password)){
+                socket.emit('auth', 'GRANTED')
+            }
+            else { socket.emit('auth', 'DENIED') }
+        });
+    });
 });
 
 ///// FIX LAG PENDING /////
@@ -97,11 +107,13 @@ nspStream.on('connection', socket => {
 
 // When home.ejs has been rendered
 nspBrowser.on('connection', socket => {
-    socket.on('onload', () => nspStream.emit('onload'));
-
-    // socket.on('frameSize', value => {
-    //     nspStream.emit('frameSize', value);
-    // });
+    var crosslockRef = firebase.database().ref('/crosslock');
+    socket.on('onload', () => {
+        // nspStream.emit('onload');
+        crosslockRef.once('value', snap => {
+            nspStream.emit('crosslock', snap.val());
+        });
+    });
 });
 
 // Web Routing
