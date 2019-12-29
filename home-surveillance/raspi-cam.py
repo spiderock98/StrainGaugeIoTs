@@ -100,6 +100,7 @@ def on_message(val):
     authAccess = val
 @sio.on('crosslock', namespace='/VideoStream')
 def on_message(dictCross):
+    global flagStream
     print(dictCross)
     if (dictCross[uniqueCameraID] == 'on'):
         flagStream = True
