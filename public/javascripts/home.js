@@ -95,10 +95,10 @@ $(() => {
     });
 });
 
-spinbox.oninput = () => {
-    // room here    
-    socketBrowser.emit('frameSize', spinbox.value);
-}
+// spinbox.oninput = () => {
+//     // room here    
+//     socketBrowser.emit('frameSize', spinbox.value);
+// }
 
 // AREA CHART
 

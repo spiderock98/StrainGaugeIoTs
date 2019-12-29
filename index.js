@@ -99,9 +99,9 @@ nspStream.on('connection', socket => {
 nspBrowser.on('connection', socket => {
     socket.on('onload', () => nspStream.emit('onload'));
 
-    socket.on('frameSize', value => {
-        nspStream.emit('frameSize', value);
-    });
+    // socket.on('frameSize', value => {
+    //     nspStream.emit('frameSize', value);
+    // });
 });
 
 // Web Routing
