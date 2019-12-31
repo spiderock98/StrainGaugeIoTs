@@ -35,7 +35,7 @@ def connect():
         frame = vs.read()
         timestamp = datetime.datetime.now()
         text = "Unoccupied"
-        frame = imutils.resize(frame, 350)
+        frame = imutils.resize(frame, 300)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
@@ -85,8 +85,7 @@ def connect():
         _, dataImg = cv2.imencode('.jpg', frame)
         if flagStream:
             sio.emit('stream', str(base64.b64encode(dataImg), 'utf-8'), namespace='/VideoStream')
-        if cv2.waitKey(100) == 27:
-            break
+        time.sleep(0.1)
     vs.stop()
 
 # @sio.on('frameSize', namespace='/VideoStream')
@@ -107,14 +106,14 @@ def on_message(dictCross):
     else:
         flagStream = False
 
-@sio.on('onload', namespace='/VideoStream')
-def on_message():
-    global flagStream
-    flagStream = True
-@sio.on('onunload', namespace='/VideoStream')
-def on_message():
-    global flagStream
-    flagStream = False
+# @sio.on('onload', namespace='/VideoStream')
+# def on_message():
+#     global flagStream
+#     flagStream = True
+# @sio.on('onunload', namespace='/VideoStream')
+# def on_message():
+#     global flagStream
+#     flagStream = False
 
 @sio.event(namespace='/VideoStream')
 def disconnect():

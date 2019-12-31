@@ -80,9 +80,9 @@ nspStream.on('connection', socket => {
         var strDBRef = firebase.database().ref('/' + uniqueSensorID + '/camera')
         strDBRef.once('value', snap => {
             if ((snap.val().id == queryCamID) && (snap.val().pass == password)){
-                socket.emit('auth', 'GRANTED')
+                socket.emit('auth', 'GRANTED');
             }
-            else { socket.emit('auth', 'DENIED') }
+            else { socket.emit('auth', 'DENIED'); }
         });
     });
 });
@@ -105,20 +105,31 @@ nspStream.on('connection', socket => {
 //     }
 // });
 
+var refSensorName = firebase.database().ref().orderByKey().startAt('sens');
 // When home.ejs has been rendered
 nspBrowser.on('connection', socket => {
     var crosslockRef = firebase.database().ref('/crosslock');
-    socket.on('onload', () => {
-        // nspStream.emit('onload');
+    socket.once('onload', () => {
         crosslockRef.once('value', snap => {
             nspStream.emit('crosslock', snap.val());
+        });
+
+        refSensorName.on('value', snap => {
+            var arrLocation = [];
+            snap.forEach(childSnap => {
+                firebase.database().ref('/' + childSnap.key + '/location').once('value', snapLocation => {
+                    arrLocation.push(snapLocation.val());
+                });
+            });
+            socket.emit('location', arrLocation);
         });
     });
 });
 
 // Web Routing
 app.get('/', (req, res) => {
-    res.render('login');
+    // res.render('login');
+    res.redirect('/login');
     console.log('Welcome ' + req.connection.remoteAddress);
     // player.play('./facebook_messenger.mp3', function(err){if (err) throw err});
 });
@@ -158,3 +169,7 @@ app.post('/calendar', (req, res) => {
         dbRef.once('value', snap => { res.status(202).send(snap.val()); });
     }
 });
+
+
+
+

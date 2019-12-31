@@ -84,7 +84,9 @@ $(() => {
                     for (var i in jsonData) {
                         dbDate.setTime(i);
                         result.push([dbDate.toDateString(), parseInt(jsonData[i])]);
-                        if ((dbDate.getDate() == qrDate.getDate()) && (dbDate.getMonth() == qrDate.getMonth())) { sortDate.push([dbDate.toTimeString(), parseInt(jsonData[i])]); }
+                        if ((dbDate.getDate() == qrDate.getDate()) && (dbDate.getMonth() == qrDate.getMonth())) {
+                            sortDate.push([dbDate.toTimeString(), parseInt(jsonData[i])]);
+                        }
                     }
                     data.addRows(sortDate);
                     chart.draw(data, options);
@@ -158,29 +160,75 @@ function drawLine() {
 
 
 // GOOGLE MAPS IMPLEMENT
-
+// new google.maps.LatLng(10.845806, 106.794524), ///utc2
 function initMap() {
-    var mapProp = {
-        center: new google.maps.LatLng(10.845806, 106.794524),
-        zoom: 18,
-    };
-    var map = new google.maps.Map(document.getElementById("map"), mapProp);
-    marker = new google.maps.Marker({
-        position: mapProp.center,
-        // animation: google.maps.Animation.BOUNCE,
+    var map = new google.maps.Map(document.getElementById("map"), {
+        center: new google.maps.LatLng(16.213342, 107.511174),
+        zoom: 6,
     });
-    marker.setMap(map);
 
-    socketBrowser.on('stream', data => {
-        // var decoded_image = 'data:image/jpg;base64,' + data;
-        marker.setIcon('data:image/jpg;base64,' + data);
+    // var marker1 = new google.maps.Marker({
+    //     position: new google.maps.LatLng(10.845806, 106.794524),
+    //     animation: google.maps.Animation.BOUNCE,
+    //     map: map,
+    //     optimized: false,
+    // });
+    // var infoWindow1 = new google.maps.InfoWindow();
+    // google.maps.event.addListener(marker1, 'click', (mouse) => {
+    //     infoWindow1.open(map, marker1);
+    //     map.setZoom(15);
+    //     marker1.setAnimation(null);
+    // });
+    // google.maps.event.addListener(infoWindow1, 'closeclick', () => {
+    //     map.setZoom(6);
+    //     marker1.setAnimation(google.maps.Animation.BOUNCE);
+    // })
+
+    
+    // socketBrowser.on('stream', data => {
+    //     // decoded_image = 'data:image/jpg;base64,' + data;
+    //     arrInfoWindow[1].setContent('<img src="' + 'data:image/jpg;base64,' + data + '" alt="video"></img>');
+    //     // marker1.setIcon('data:image/jpg;base64,' + data);
+    // });
+
+    var arrMarker = [];
+    var arrInfoWindow = [];
+    socketBrowser.once('location', arrLocation => {
+        // console.log('done1');
+        
+        for (var index in arrLocation) {
+            // console.log(arrLocation[index].x);
+            // arrMarker[index] = new google.maps.Marker({
+            arrMarker.push(new google.maps.Marker({
+                position: new google.maps.LatLng(arrLocation[index].x, arrLocation[index].y),
+                // animation: google.maps.Animation.BOUNCE,
+                map: map,
+                optimized: false,
+            })
+            );
+            // console.log('done2');
+            arrInfoWindow.push(new google.maps.InfoWindow());
+            google.maps.event.addListener(arrMarker[index], 'click', (mouse) => {
+                arrInfoWindow[index].open(map, arrMarker[index]);
+                map.setZoom(15);
+                // arrMarker[index].setAnimation(null);
+            });
+            google.maps.event.addListener(arrInfoWindow[index], 'closeclick', () => {
+                map.setZoom(6);
+                // arrMarker[index].setAnimation(google.maps.Animation.BOUNCE);
+            });
+            // console.log('done3');
+        }
+        // console.log('DONE');
+        socketBrowser.on('stream', data => {
+            // decoded_image = 'data:image/jpg;base64,' + data;
+            arrInfoWindow[1].setContent('<img src="' + 'data:image/jpg;base64,' + data + '" alt="video"></img>');
+            // marker1.setIcon('data:image/jpg;base64,' + data);
+        });
     });
 }
 
 // // jQuery Onload
 $(document).ready(() => {
-    socketBrowser.emit('onload')
+    socketBrowser.emit('onload');
 });
-
-// const map2 = document.getElementById('map2');
-// map2.src = 
