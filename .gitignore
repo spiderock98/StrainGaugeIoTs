@@ -3,7 +3,6 @@
 # Edit at https://www.gitignore.io/?templates=node,python
 
 counter_car/road.mp4
-counter_car/road-short.mp4
 .vscode/
 
 ### Node ###
