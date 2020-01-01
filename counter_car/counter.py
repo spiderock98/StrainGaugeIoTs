@@ -3,16 +3,31 @@ import cv2
 import pandas as pd
 import imutils
 import socketio
-# import socket
+import time
 import base64
 from crop import region_of_interest
 
 sio = socketio.Client()
+flagStream = False
+uniqueCameraID = 'stream'
+uniqueSensorID = 'sensor3' # to query database
+authAccess = None
 
 @sio.event(namespace='/VideoStream')
 def connect():
-    print('connection established')
-    cap = cv2.VideoCapture('./road.mp4')
+    print('[INFO] Connection Established')
+    while (authAccess != 'GRANTED'):
+        queryCamID = input('Enter ID: ')
+        password = input('Enter Password: ')
+        sio.emit('auth', (queryCamID, password, uniqueSensorID), namespace='/VideoStream')
+        time.sleep(2)
+        if (authAccess == 'DENIED'):
+            print('[INFO] Try Again ...')
+        continue
+    print('[INFO] Access Granted')
+
+    # cap = cv2.VideoCapture('counter_car/road-short.mp4')
+    cap = cv2.VideoCapture('counter_car/road.mp4')
     frames_count, fps, width, height = cap.get(cv2.CAP_PROP_FRAME_COUNT), cap.get(cv2.CAP_PROP_FPS), cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
     width = int(width)
     height = int(height)
@@ -38,7 +53,7 @@ def connect():
     while (1):
         _, frame = cap.read()
         # image = cv2.resize(frame, (0, 0), None, 0.5, 0.5)
-        image = imutils.resize(frame, 250)
+        image = imutils.resize(frame, 350)
         region_of_interest_vertices = ([16,138],[90,45],[155,45],[240,138])
         cropped_image = region_of_interest(image,np.array([region_of_interest_vertices], np.int32),)
         gray = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
@@ -147,23 +162,39 @@ def connect():
         #cv2.imshow("image", image)
         #cv2.imshow("cropped_image", cropped_image)
         framenumber = framenumber + 1
-        if cv2.waitKey(1) == 27:
-        	break
         
         _,dataImg = cv2.imencode('.jpg', image)
-        sio.emit('stream', (str(base64.b64encode(dataImg), 'utf-8')), namespace='/VideoStream')
+        if flagStream:
+            sio.emit('stream', (str(base64.b64encode(dataImg), 'utf-8')), namespace='/VideoStream')
+
+        # time.sleep(0.1)
     # cap.release()
     # cv2.destroyAllWindows()
 
-# @sio.on('hi', namespace='/VideoStream')
-# def on_message(data):
-#     print(data)
+@sio.on('auth', namespace='/VideoStream')
+def on_message(val):
+    global authAccess
+    authAccess = val
+
+@sio.on('crosslock', namespace='/VideoStream')
+def on_message(dictCross):
+    global flagStream
+    print(dictCross)
+    if (dictCross[uniqueCameraID] == 'on'):
+        flagStream = True
+    else:
+        flagStream = False
+
+@sio.on('onunload', namespace='/VideoStream')
+def on_message():
+    global flagStream
+    flagStream = False
 
 @sio.event
 def disconnect():
-    print('disconnected from server')
+    print('[INFO] Disconnected from server')
 
 # sio.connect('https://stream-opencv.herokuapp.com')
-sio.connect('http://localhost:8080/', namespaces=['/VideoStream'])
-# sio.connect('http://27.78.42.155:8080/')
+# sio.connect('http://localhost:8080/', namespaces=['/VideoStream'])
+sio.connect('http://27.78.42.155:8080/', namespaces=['/VideoStream'])
 sio.wait()

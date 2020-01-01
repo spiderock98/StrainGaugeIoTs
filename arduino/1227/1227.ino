@@ -9,6 +9,7 @@ char host1[] = "27.78.42.155";
 int port = 8080;
 unsigned long randVal = 0;
 long long previousMillis = 0;
+String MAC ;
 
 void setup() {
   Serial.begin(115200);
@@ -21,6 +22,8 @@ void setup() {
   }
   Serial.print(F("\nIP: "));
   Serial.println(WiFi.localIP());
+  MAC = WiFi.macAddress();
+  Serial.print(MAC);
 
   if (!client.connect(host1, port)) {
     Serial.println("Failed to connect to host1");
@@ -39,12 +42,12 @@ void loop() {
     randVal = random(1,5000);
     if (randVal > 2500){
       Serial.println(randVal);
-      client.send("sensor", "value", String(randVal));
+      client.send("sensor", MAC, String(randVal));
     }
   }
 
   if (!client.connected()) {
-    Serial.println("Attemping to reconnect ...");
+    //Serial.println("Attemping to reconnect ...");
     client.reconnect(host1, port);
   }
 }

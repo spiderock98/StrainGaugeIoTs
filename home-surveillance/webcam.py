@@ -7,7 +7,6 @@ import imutils
 import datetime
 import time
 
-vs = VideoStream(0).start()
 sio = socketio.Client()
 # frameSize = 300
 flagStream = False
@@ -28,6 +27,8 @@ def connect():
         continue
     print('[INFO] Access Granted')
     
+    vs = VideoStream(0).start()
+
     avg = None
     lastUploaded = datetime.datetime.now()
     motionCounter = 0
@@ -111,10 +112,10 @@ def on_message(dictCross):
 # def on_message():
 #     global flagStream
 #     flagStream = True
-# @sio.on('onunload', namespace='/VideoStream')
-# def on_message():
-#     global flagStream
-#     flagStream = False
+@sio.on('onunload', namespace='/VideoStream')
+def on_message():
+    global flagStream
+    flagStream = False
 
 @sio.event(namespace='/VideoStream')
 def disconnect():

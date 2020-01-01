@@ -48,37 +48,39 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Socket IO
 var nspStream = io.of('/VideoStream');
 var nspBrowser = io.of('/Browser');
 // var nspEsp = io.of('/Esp8266');
+var refLog = firebase.database().ref('/sensor1/logs');
+var refCrossLog = firebase.database().ref('/crosslock');
+var reffilter_Sensor = firebase.database().ref().orderByKey().startAt('sens');
 
-var dbRef = firebase.database().ref('/sensor1/logs');
-dbRef.on('child_added', snap => {
-    nspBrowser.emit('cloudVal', snap.key, snap.val());
-});
+refLog.on('child_added', snap => nspBrowser.emit('cloudVal', snap.key, snap.val()));
 
 io.on('connection', socket => {
-    // console.log('Esp8266 has connected');
-    socket.on('sensor', data => {
-        var update = {};
-        var now = new Date();
-        update[now.getTime()] = data.value;
-        // console.log(data.value);
-        firebase.database().ref('/sensor1/logs').update(update);
+    socket.on('sensor', objData => {
+        var MAC = Object.keys(objData).toString();
+        reffilter_Sensor.once('value')
+        .then(arrSensor => {
+            arrSensor.forEach(sensor => {
+                if (MAC == sensor.val().MAC) {
+                    var update = {};
+                    var now = new Date();
+                    var refLOG = firebase.database().ref('/' + sensor.key + '/logs');
+                    update[now.getTime()] = objData[MAC];
+                    refLOG.update(update);
+                }
+            });
+        });  
     });
-    // socket.on('disconnect', () => console.log('see you again'));
 });
-
-// const peer = new peerjs('lwjd5qra8257b9');
 
 nspStream.on('connection', socket => {
     console.log('Python Socket has connected');
     // if btn then which socket id can emit
     socket.on('stream', data => nspBrowser.emit('stream', data));
     socket.on('auth', (queryCamID, password, uniqueSensorID) => {
-        var strDBRef = firebase.database().ref('/' + uniqueSensorID + '/camera');
-        strDBRef.once('value', snap => {
+        firebase.database().ref('/' + uniqueSensorID + '/camera').once('value', snap => {
             if ((snap.val().id == queryCamID) && (snap.val().pass == password)) {
                 socket.emit('auth', 'GRANTED');
             }
@@ -87,33 +89,15 @@ nspStream.on('connection', socket => {
     });
 });
 
-///// FIX LAG PENDING /////
-
-// nspStream.on('connection', socket => {
-//     var decoded_image;
-//     var flagData = true;
-//     console.log('Python Socket has connected');
-//     // redirect data stream
-//     if (flagData){
-//         socket.on('stream', data => {
-//             // decoded_image = 'data:image/jpg;base64,' + data;
-//             // if (!varData) {varData = data;}
-//             flagData = false;
-//             nspBrowser.emit('stream', data);
-//             flagData = true;
-//         });
-//     }
-// });
-
-
 // When home.ejs has been rendered
 nspBrowser.on('connection', socket => {
+    socket.on('disconnect', () => nspStream.emit('onunload'));
     socket.on('setDBStatus', objCrossLock => {
-        firebase.database().ref('/crosslock').set(objCrossLock);
+        refCrossLog.set(objCrossLock);
     });
     socket.once('onload', () => {
         var arrLocation = [];
-        firebase.database().ref().orderByKey().startAt('sens').on('value', arrSensor => {
+        reffilter_Sensor.on('value', arrSensor => {
             arrSensor.forEach(sensor => {
                 firebase.database().ref('/' + sensor.key + '/location').once('value', location => {
                     arrLocation.push(location.val());
@@ -122,21 +106,23 @@ nspBrowser.on('connection', socket => {
         });
 
         var objID = {};
-        firebase.database().ref().orderByKey().startAt('sens').on('value', snap => {
-            snap.forEach(arr => {
-                objID[arr.key] = arr.val().camera.id
+        reffilter_Sensor.on('value', arrSensor => {
+            arrSensor.forEach(sensor => {
+                objID[sensor.key] = sensor.val().camera.id
             });
         });
 
         var objStatus = {};
-        firebase.database().ref('/crosslock').on('value', snap => {
+        refCrossLog.on('value', snap => {
+            console.log(snap.val());
+            
             nspStream.emit('crosslock', snap.val());
             objStatus = snap.val();
             socket.emit('dbInfo', objID, objStatus, arrLocation);
         });
         
 
-        // firebase.database().ref('/crosslock').on('value', snap => {
+        // refCrossLog.on('value', snap => {
         //     nspStream.emit('crosslock', snap.val());
         //     objStatus = snap.val();
         // });
@@ -185,21 +171,9 @@ app.get('/login', (req, res) => {
 
 app.post('/calendar', (req, res) => {
     if (req.body.download) {
-        dbRef.once('value', snap => { res.status(201).send(snap.val()); });
+        refLog.once('value', snap => { res.status(201).send(snap.val()); });
     }
     else {
-        dbRef.once('value', snap => { res.status(202).send(snap.val()); });
+        refLog.once('value', snap => { res.status(202).send(snap.val()); });
     }
 });
-
-// var objID = {};
-// firebase.database().ref().orderByKey().startAt('sens').on('value', snap => {
-//     snap.forEach(arr => {
-//         objID[arr.key] = arr.val().camera.id
-//     });
-// });
-
-// var objCrossLock = {} ;
-// firebase.database().ref('/crosslock').once('value', snap => {
-//     console.log(snap.val());
-// });
