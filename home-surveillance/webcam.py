@@ -35,7 +35,7 @@ def connect():
         frame = vs.read()
         timestamp = datetime.datetime.now()
         text = "Unoccupied"
-        frame = imutils.resize(frame, 300)
+        frame = imutils.resize(frame, 350)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
@@ -97,6 +97,7 @@ def connect():
 def on_message(val):
     global authAccess
     authAccess = val
+
 @sio.on('crosslock', namespace='/VideoStream')
 def on_message(dictCross):
     global flagStream

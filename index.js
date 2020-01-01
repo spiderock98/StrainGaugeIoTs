@@ -77,9 +77,9 @@ nspStream.on('connection', socket => {
     // if btn then which socket id can emit
     socket.on('stream', data => nspBrowser.emit('stream', data));
     socket.on('auth', (queryCamID, password, uniqueSensorID) => {
-        var strDBRef = firebase.database().ref('/' + uniqueSensorID + '/camera')
+        var strDBRef = firebase.database().ref('/' + uniqueSensorID + '/camera');
         strDBRef.once('value', snap => {
-            if ((snap.val().id == queryCamID) && (snap.val().pass == password)){
+            if ((snap.val().id == queryCamID) && (snap.val().pass == password)) {
                 socket.emit('auth', 'GRANTED');
             }
             else { socket.emit('auth', 'DENIED'); }
@@ -105,24 +105,46 @@ nspStream.on('connection', socket => {
 //     }
 // });
 
-var refSensorName = firebase.database().ref().orderByKey().startAt('sens');
+
 // When home.ejs has been rendered
 nspBrowser.on('connection', socket => {
-    var crosslockRef = firebase.database().ref('/crosslock');
+    socket.on('setDBStatus', objCrossLock => {
+        firebase.database().ref('/crosslock').set(objCrossLock);
+    });
     socket.once('onload', () => {
-        crosslockRef.once('value', snap => {
-            nspStream.emit('crosslock', snap.val());
-        });
-
-        refSensorName.on('value', snap => {
-            var arrLocation = [];
-            snap.forEach(childSnap => {
-                firebase.database().ref('/' + childSnap.key + '/location').once('value', snapLocation => {
-                    arrLocation.push(snapLocation.val());
+        var arrLocation = [];
+        firebase.database().ref().orderByKey().startAt('sens').on('value', arrSensor => {
+            arrSensor.forEach(sensor => {
+                firebase.database().ref('/' + sensor.key + '/location').once('value', location => {
+                    arrLocation.push(location.val());
                 });
             });
-            socket.emit('location', arrLocation);
         });
+
+        var objID = {};
+        firebase.database().ref().orderByKey().startAt('sens').on('value', snap => {
+            snap.forEach(arr => {
+                objID[arr.key] = arr.val().camera.id
+            });
+        });
+
+        var objStatus = {};
+        firebase.database().ref('/crosslock').on('value', snap => {
+            nspStream.emit('crosslock', snap.val());
+            objStatus = snap.val();
+            socket.emit('dbInfo', objID, objStatus, arrLocation);
+        });
+        
+
+        // firebase.database().ref('/crosslock').on('value', snap => {
+        //     nspStream.emit('crosslock', snap.val());
+        //     objStatus = snap.val();
+        // });
+        
+        // setTimeout(() => {
+        //     console.log(objStatus);
+        //     socket.emit('dbInfo', objID, objStatus, arrLocation);
+        // }, 500);
     });
 });
 
@@ -170,6 +192,14 @@ app.post('/calendar', (req, res) => {
     }
 });
 
+// var objID = {};
+// firebase.database().ref().orderByKey().startAt('sens').on('value', snap => {
+//     snap.forEach(arr => {
+//         objID[arr.key] = arr.val().camera.id
+//     });
+// });
 
-
-
+// var objCrossLock = {} ;
+// firebase.database().ref('/crosslock').once('value', snap => {
+//     console.log(snap.val());
+// });

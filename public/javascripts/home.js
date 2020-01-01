@@ -158,75 +158,150 @@ function drawLine() {
     });
 }
 
+class mapDevice {
+    constructor(sensorID, camID, status, location, map) {
+        this.sensorID = sensorID;
+        this.status = status;
+        this.camID = camID;
+        this.location = location;
+        this.map = map;
 
-// GOOGLE MAPS IMPLEMENT
-// new google.maps.LatLng(10.845806, 106.794524), ///utc2
+        this.InfoWindow = new google.maps.InfoWindow();
+        this.marker = new google.maps.Marker({
+            position: new google.maps.LatLng(this.location.x, this.location.y),
+            map: this.map, // put marker into map
+            optimized: false,
+            // animation: google.maps.Animation.BOUNCE,
+        });
+    }
+
+    get getCamID() { return this.camID; }
+    get getInfoWindow() { return this.InfoWindow; }
+    get getMarker() { return this.marker; }
+    get getStatus() { return this.status; }
+    set setStatus(stt) { this.status = stt; }
+}
+
 function initMap() {
     var map = new google.maps.Map(document.getElementById("map"), {
         center: new google.maps.LatLng(16.213342, 107.511174),
         zoom: 6,
     });
 
-    // var marker1 = new google.maps.Marker({
-    //     position: new google.maps.LatLng(10.845806, 106.794524),
-    //     animation: google.maps.Animation.BOUNCE,
-    //     map: map,
-    //     optimized: false,
-    // });
-    // var infoWindow1 = new google.maps.InfoWindow();
-    // google.maps.event.addListener(marker1, 'click', (mouse) => {
-    //     infoWindow1.open(map, marker1);
-    //     map.setZoom(15);
-    //     marker1.setAnimation(null);
-    // });
-    // google.maps.event.addListener(infoWindow1, 'closeclick', () => {
-    //     map.setZoom(6);
-    //     marker1.setAnimation(google.maps.Animation.BOUNCE);
-    // })
-
-    
-    // socketBrowser.on('stream', data => {
-    //     // decoded_image = 'data:image/jpg;base64,' + data;
-    //     arrInfoWindow[1].setContent('<img src="' + 'data:image/jpg;base64,' + data + '" alt="video"></img>');
-    //     // marker1.setIcon('data:image/jpg;base64,' + data);
-    // });
-
-    var arrMarker = [];
-    var arrInfoWindow = [];
-    socketBrowser.once('location', arrLocation => {
-        // console.log('done1');
-        
-        for (var index in arrLocation) {
-            // console.log(arrLocation[index].x);
-            // arrMarker[index] = new google.maps.Marker({
-            arrMarker.push(new google.maps.Marker({
-                position: new google.maps.LatLng(arrLocation[index].x, arrLocation[index].y),
-                // animation: google.maps.Animation.BOUNCE,
-                map: map,
-                optimized: false,
-            })
-            );
-            // console.log('done2');
-            arrInfoWindow.push(new google.maps.InfoWindow());
-            google.maps.event.addListener(arrMarker[index], 'click', (mouse) => {
-                arrInfoWindow[index].open(map, arrMarker[index]);
-                map.setZoom(15);
-                // arrMarker[index].setAnimation(null);
-            });
-            google.maps.event.addListener(arrInfoWindow[index], 'closeclick', () => {
-                map.setZoom(6);
-                // arrMarker[index].setAnimation(google.maps.Animation.BOUNCE);
-            });
-            // console.log('done3');
+    // Refreshing
+    socketBrowser.once('dbInfo', (objID, objStatus, arrLocation) => {
+        // console.log(objID); // {sensor1: "acer", sensor2: "raspi"}
+        // console.log(objStatus); // {acer: "off", raspi: "on"}
+        // console.log(arrLocation); // [{x: 10.845806, y: 106.794524}, {x: 10.848621, y: 106.773583}]
+        var arrMapDevice = [];
+        var count = 0;
+        for (const item in objID) {
+            arrMapDevice.push(new mapDevice(item, objID[item], objStatus[objID[item]], arrLocation[count], map))
+            ++count;
         }
-        // console.log('DONE');
-        socketBrowser.on('stream', data => {
-            // decoded_image = 'data:image/jpg;base64,' + data;
-            arrInfoWindow[1].setContent('<img src="' + 'data:image/jpg;base64,' + data + '" alt="video"></img>');
-            // marker1.setIcon('data:image/jpg;base64,' + data);
+
+        arrMapDevice.forEach(device => {
+            console.log(device);
+            
+            google.maps.event.addListener(device.getMarker, 'click', () => {
+                map.setZoom(15);
+                device.getMarker.setClickable(false);
+                device.getInfoWindow.open(map, device.getMarker);
+                socketBrowser.on('stream', data => {
+                    // decoded_image = 'data:image/jpg;base64,' + data;
+                    device.getInfoWindow.setContent('<img src="' + 'data:image/jpg;base64,' + data + '" alt="video"></img>');
+                });
+
+                // if click when dbStatus is ON => first click onload
+                if (device.getStatus == 'off') {
+                    // SWAP status then write to DB using objStatus
+                    arrMapDevice.forEach(element => {
+                        if (element.getStatus == 'on') {
+                            element.getMarker.setClickable(true);
+                            element.getInfoWindow.close();
+                            element.setStatus = 'off';
+                            objStatus[element.getCamID] = 'off';
+                        }
+                    });
+                    device.setStatus = 'on';
+                    objStatus[device.getCamID] = 'on';
+                    socketBrowser.emit('setDBStatus', objStatus);
+                }
+            });
+            google.maps.event.addListener(device.getInfoWindow, 'closeclick', () => {
+                map.setZoom(8);
+                arrMapDevice.forEach(element => {
+                    element.getMarker.setClickable(true);
+                });
+                // device.getMarker.setAnimation(google.maps.Animation.BOUNCE);
+            });
         });
     });
+    
+
+    // socketBrowser.once('location', arrLocation => {
+    //     for (var index in arrLocation) {
+    //         arrMarker.push(new google.maps.Marker({
+    //             position: new google.maps.LatLng(arrLocation[index].x, arrLocation[index].y),
+    //             // animation: google.maps.Animation.BOUNCE,
+    //             map: map,
+    //             optimized: false,
+    //         })
+    //         );
+    //         arrInfoWindow.push(new google.maps.InfoWindow());
+    //         google.maps.event.addListener(arrMarker[index], 'click', (mouse) => {
+    //             arrInfoWindow[index].open(map, arrMarker[index]);
+    //             map.setZoom(15);
+    //         });
+    //         google.maps.event.addListener(arrInfoWindow[index], 'closeclick', () => {
+    //             map.setZoom(6);
+    //             // arrMarker[index].setAnimation(google.maps.Animation.BOUNCE);
+    //         });
+    //     }
+    //     socketBrowser.on('stream', data => {
+    //         // decoded_image = 'data:image/jpg;base64,' + data;
+    //         arrInfoWindow[1].setContent('<img src="' + 'data:image/jpg;base64,' + data + '" alt="video"></img>');
+    //         // marker1.setIcon('data:image/jpg;base64,' + data);
+    //     });
+    // });
 }
+
+// GOOGLE MAPS IMPLEMENT
+// new google.maps.LatLng(10.845806, 106.794524), ///utc2
+// function initMap() {
+//     var map = new google.maps.Map(document.getElementById("map"), {
+//         center: new google.maps.LatLng(16.213342, 107.511174),
+//         zoom: 6,
+//     });
+
+//     var arrMarker = [];
+//     var arrInfoWindow = [];
+//     socketBrowser.once('location', arrLocation => {
+//         for (var index in arrLocation) {
+//             arrMarker.push(new google.maps.Marker({
+//                 position: new google.maps.LatLng(arrLocation[index].x, arrLocation[index].y),
+//                 // animation: google.maps.Animation.BOUNCE,
+//                 map: map,
+//                 optimized: false,
+//             })
+//             );
+//             arrInfoWindow.push(new google.maps.InfoWindow());
+//             google.maps.event.addListener(arrMarker[index], 'click', (mouse) => {
+//                 arrInfoWindow[index].open(map, arrMarker[index]);
+//                 map.setZoom(15);
+//             });
+//             google.maps.event.addListener(arrInfoWindow[index], 'closeclick', () => {
+//                 map.setZoom(6);
+//                 // arrMarker[index].setAnimation(google.maps.Animation.BOUNCE);
+//             });
+//         }
+//         socketBrowser.on('stream', data => {
+//             // decoded_image = 'data:image/jpg;base64,' + data;
+//             arrInfoWindow[1].setContent('<img src="' + 'data:image/jpg;base64,' + data + '" alt="video"></img>');
+//             // marker1.setIcon('data:image/jpg;base64,' + data);
+//         });
+//     });
+// }
 
 // // jQuery Onload
 $(document).ready(() => {
