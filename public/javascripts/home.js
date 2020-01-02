@@ -1,8 +1,9 @@
-var btnLogout = document.getElementById('btnLogout');
-var spinbox = document.getElementById("spinbox");
-var qrLog = document.getElementById('qrLog');
-var fieldDashboard = document.getElementById('fieldDashboard');
-var fieldDevices = document.getElementById('fieldDevices');
+// var btnLogout = document.getElementById('btnLogout');
+// var spinbox = document.getElementById("spinbox");
+// var qrLog = document.getElementById('qrLog');
+// var fieldDashboard = document.getElementById('fieldDashboard');
+// var fieldDevices = document.getElementById('fieldDevices');
+// var fieldUsers = document.getElementById('fieldUsers');
 
 var socketBrowser = io('/Browser');
 
@@ -18,85 +19,85 @@ btnLogout.addEventListener('click', () => window.location.href = '/login');
 
 // jQuery Form Plugin ajax onlick submit
 // https://jquery-form.github.io/form/api/
-$(() => {
-    var jsonData;
-    $('#formCal').ajaxForm({
-        success: data => {
-            jsonData = data;
-        },
-        statusCode: {
-            201: () => {
-                console.log('201 download found');
-                var userDate = new Date(qrLog.value);
-                var result = {};
-                var retArr = [];
+// $(() => {
+//     var jsonData;
+//     $('#formCal').ajaxForm({
+//         success: data => {
+//             jsonData = data;
+//         },
+//         statusCode: {
+//             201: () => {
+//                 console.log('201 download found');
+//                 var userDate = new Date(qrLog.value);
+//                 var result = {};
+//                 var retArr = [];
 
-                for (var time in jsonData) {
-                    var qrDate = new Date();
-                    qrDate.setTime(time);
+//                 for (var time in jsonData) {
+//                     var qrDate = new Date();
+//                     qrDate.setTime(time);
 
-                    if ((qrDate.getDate() == userDate.getDate()) && (qrDate.getMonth() == userDate.getMonth())) {
-                        result['time'] = qrDate;
-                        result['sensor'] = jsonData[time];
-                        retArr.push(result);
-                        result = {};
-                    }
-                }
+//                     if ((qrDate.getDate() == userDate.getDate()) && (qrDate.getMonth() == userDate.getMonth())) {
+//                         result['time'] = qrDate;
+//                         result['sensor'] = jsonData[time];
+//                         retArr.push(result);
+//                         result = {};
+//                     }
+//                 }
 
-                if (retArr.length) {
-                    // new sheet from json
-                    var sheet = XLSX.utils.json_to_sheet(retArr);
-                    // new workbook
-                    var wb = XLSX.utils.book_new();
-                    // add sheet to workbook
-                    XLSX.utils.book_append_sheet(wb, sheet, 'data');
-                    // save wb
-                    XLSX.writeFile(wb, 'strain.xlsx');
-                }
-                else { window.alert('Nothing to Download ...'); }
-            },
-            202: () => {
-                console.log('202 log pie found');
-                // PIE CHART 
-                google.charts.load("current", { packages: ["corechart"] });
-                google.charts.setOnLoadCallback(drawPie);
-                function drawPie() {
-                    var data = google.visualization.arrayToDataTable([
-                        ['Time in day', 'Counter'],
-                        [String(), Number()],
-                    ]);
+//                 if (retArr.length) {
+//                     // new sheet from json
+//                     var sheet = XLSX.utils.json_to_sheet(retArr);
+//                     // new workbook
+//                     var wb = XLSX.utils.book_new();
+//                     // add sheet to workbook
+//                     XLSX.utils.book_append_sheet(wb, sheet, 'data');
+//                     // save wb
+//                     XLSX.writeFile(wb, 'strain.xlsx');
+//                 }
+//                 else { window.alert('Nothing to Download ...'); }
+//             },
+//             202: () => {
+//                 console.log('202 log pie found');
+//                 // PIE CHART 
+//                 google.charts.load("current", { packages: ["corechart"] });
+//                 google.charts.setOnLoadCallback(drawPie);
+//                 function drawPie() {
+//                     var data = google.visualization.arrayToDataTable([
+//                         ['Time in day', 'Counter'],
+//                         [String(), Number()],
+//                     ]);
 
-                    var options = {
-                        title: 'Daily Log',
-                        is3D: true,
-                        width: 900,
-                        height: 450,
-                    };
+//                     var options = {
+//                         title: 'Daily Log',
+//                         is3D: true,
+//                         width: 900,
+//                         height: 450,
+//                     };
 
-                    var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
-                    // chart.draw(data, options);
+//                     var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+//                     // chart.draw(data, options);
 
-                    // socketBrowser.once('jsCrawl', jsonData => {
-                    var result = [];
-                    var sortDate = [];
-                    var qrDate = new Date(qrLog.value);
-                    var dbDate = new Date();
+//                     // socketBrowser.once('jsCrawl', jsonData => {
+//                     var result = [];
+//                     var sortDate = [];
+//                     var qrDate = new Date(qrLog.value);
+//                     var dbDate = new Date();
 
-                    for (var i in jsonData) {
-                        dbDate.setTime(i);
-                        result.push([dbDate.toDateString(), parseInt(jsonData[i])]);
-                        if ((dbDate.getDate() == qrDate.getDate()) && (dbDate.getMonth() == qrDate.getMonth())) {
-                            sortDate.push([dbDate.toTimeString(), parseInt(jsonData[i])]);
-                        }
-                    }
-                    data.addRows(sortDate);
-                    chart.draw(data, options);
-                    // });
-                }
-            }
-        }
-    });
-});
+//                     for (var i in jsonData) {
+//                         dbDate.setTime(i);
+//                         result.push([dbDate.toDateString(), parseInt(jsonData[i])]);
+//                         if ((dbDate.getDate() == qrDate.getDate()) && (dbDate.getMonth() == qrDate.getMonth())) {
+//                             sortDate.push([dbDate.toTimeString(), parseInt(jsonData[i])]);
+//                         }
+//                     }
+//                     data.addRows(sortDate);
+//                     chart.draw(data, options);
+//                     // });
+//                 }
+//             }
+//         }
+//     });
+// });
 
 // spinbox.oninput = () => {
 //     // room here    
@@ -105,61 +106,61 @@ $(() => {
 
 // AREA CHART
 
-google.charts.load('current', { 'packages': ['corechart'] });
-google.charts.setOnLoadCallback(drawLine);
+// google.charts.load('current', { 'packages': ['corechart'] });
+// google.charts.setOnLoadCallback(drawLine);
 
-function drawLine() {
-    var data = google.visualization.arrayToDataTable([
-        ['Time', 'Sensor Values'],
-        [String(), Number()],
-    ]);
+// function drawLine() {
+//     var data = google.visualization.arrayToDataTable([
+//         ['Time', 'Sensor Values'],
+//         [String(), Number()],
+//     ]);
 
-    var options = {
-        title: 'Logs Table',
-        // curveType: 'function',
-        // legend: { position: 'bottom' },
-        // lineWidth: 4,
-        chartArea: { width: '80%' },
-        animation: { "startup": true, duration: 1000, easing: 'out' },
+//     var options = {
+//         title: 'Logs Table',
+//         // curveType: 'function',
+//         // legend: { position: 'bottom' },
+//         // lineWidth: 4,
+//         chartArea: { width: '80%' },
+//         animation: { "startup": true, duration: 1000, easing: 'out' },
 
-        pointSize: 2,
-        hAxis: { title: 'Time', titleTextStyle: { color: '#333' } },
-        vAxis: { minValue: 0 },
-        style: { 'fill-color': '#a52714' },
-        // point: { size: 2, shape-type: 'star', fill-color: 'fill-color', }
-    };
+//         pointSize: 2,
+//         hAxis: { title: 'Time', titleTextStyle: { color: '#333' } },
+//         vAxis: { minValue: 0 },
+//         style: { 'fill-color': '#a52714' },
+//         // point: { size: 2, shape-type: 'star', fill-color: 'fill-color', }
+//     };
 
-    // var chart = new google.visualization.LineChart(document.getElementById('linechart'));
-    var chart = new google.visualization.AreaChart(document.getElementById('linechart'));
-    chart.draw(data, options); // init
+//     // var chart = new google.visualization.LineChart(document.getElementById('linechart'));
+//     var chart = new google.visualization.AreaChart(document.getElementById('linechart'));
+//     chart.draw(data, options); // init
 
-    // ajax onload page
-    // $.ajax('/calendar', {
-    //     method: 'POST',
-    //     async: false,
-    //     success: jsonData => {
-    //         var dbDate = new Date();
-    //         var sortDate = [];
-    //         for (var time in jsonData) {
-    //             dbDate.setTime(time);
-    //             sortDate.push([dbDate.toTimeString(), parseInt(jsonData[time])]);
-    //         }
-    //         data.addRows(sortDate);
-    //         chart.draw(data, options);
-    //     }
-    // });
+//     // ajax onload page
+//     $.ajax('/calendar', {
+//         method: 'POST',
+//         async: false,
+//         success: jsonData => {
+//             var dbDate = new Date();
+//             var sortDate = [];
+//             for (var time in jsonData) {
+//                 dbDate.setTime(time);
+//                 sortDate.push([dbDate.toTimeString(), parseInt(jsonData[time])]);
+//             }
+//             data.addRows(sortDate);
+//             chart.draw(data, options);
+//         }
+//     });
 
-    // on new log data 
-    socketBrowser.on('cloudVal', (time, log) => {
-        var d = new Date();
-        d.setTime(time);
+//     // on new log data 
+//     socketBrowser.on('cloudVal', (time, log) => {
+//         var d = new Date();
+//         d.setTime(time);
 
-        data.addRows([
-            [d.toTimeString(), parseInt(log)]
-        ]);
-        chart.draw(data, options);
-    });
-}
+//         data.addRows([
+//             [d.toTimeString(), parseInt(log)]
+//         ]);
+//         chart.draw(data, options);
+//     });
+// }
 
 class mapDevice {
     constructor(sensorID, camID, status, location, map) {
@@ -189,6 +190,15 @@ function initMap() {
     var map = new google.maps.Map(document.getElementById("map"), {
         center: new google.maps.LatLng(16.213342, 107.511174),
         zoom: 6,
+        fullscreenControl: false,
+        keyboardShortcuts: false,
+        mapTypeControl: false,
+        mapTypeId: 'satellite',
+        panControl: false,
+        rotateControl: false,
+        scaleControl: false,
+        streetViewControl: false,
+        zoomControl: false,
     });
 
     // Refreshing

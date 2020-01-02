@@ -1,0 +1,27 @@
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 55%;
+    /* width: -100px; */
+    display: inline-block;
+    float: right;
+    padding: 50px;
+    /* display: flex; */
+  }
+  
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+
+/* .info-region {
+    align-self: auto;
+    align-items: baseline;
+    align-content: center;
+    float: right;
+} */

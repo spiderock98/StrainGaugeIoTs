@@ -1,7 +1,7 @@
-var btnLogout = document.getElementById('btnLogout');
-var fieldDashboard = document.getElementById('fieldDashboard');
-var fieldDevices = document.getElementById('fieldDevices');
-var btnDevices = document.getElementById('btnDevices');
+// var btnLogout = document.getElementById('btnLogout');
+// var fieldDashboard = document.getElementById('fieldDashboard');
+// var fieldDevices = document.getElementById('fieldDevices');
+// var btnDevices = document.getElementById('btnDevices');
 var menu = document.getElementById('menu');
 var stt1Sw = document.getElementById('stt1Sw');
 // var stt1txt = document.getElementById('stt1txt');

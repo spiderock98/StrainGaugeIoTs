@@ -5,6 +5,31 @@ $('#btnLogout').click(() => window.location.href = '/login');
 
 var socketBrowser = io('/Browser');
 
+// onclick "view log"
+socketBrowser.on('card', (html) => {
+    $("div.card-grid-space").replaceWith(html);
+    // document.getElementById('tbInfo').style = "display: inline;";
+
+    function changeStatus(sw, sttTxt, sttIcon) {
+        this.sttTxt = document.getElementsByClassName(sttTxt);
+        this.sttIcon = document.getElementsByClassName(sttIcon);
+        if (sw.checked == true) {
+            sttTxt.style = "color: darkgreen;";
+            sttTxt.innerHTML = "Online";
+            sttIcon.src = "/images/active.svg";
+        }
+        else {
+            sttTxt.style = "color: darkred;";
+            sttTxt.innerHTML = "Offline";
+            sttIcon.src = "/images/error.png";
+        }
+    };
+    
+    document.getElementById('stt1Sw').onclick = () => {
+        changeStatus(stt1Sw, stt1txt, stt1icon);
+    };
+})
+
 // jQuery Form Plugin ajax onlick submit
 // https://jquery-form.github.io/form/api/
 $(() => {

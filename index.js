@@ -22,6 +22,7 @@ const firebase = require('firebase');
 const admin = require('firebase-admin');
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+const fs = require('fs');
 // const peerjs = require('peerjs');
 // var p2p = require('socket.io-p2p')
 // var player = require('play-sound')(opts = {});
@@ -89,17 +90,14 @@ nspStream.on('connection', socket => {
     });
 });
 
-var flagDisconnect;
+// var flagDisconnect;
 // var i = 0;
 // When home.ejs has been rendered
 nspBrowser.on('connection', socket => {
-    // setTimeout(() => {
-
-    // }, 3000);
-    flagDisconnect = true;
+    // flagDisconnect = true;
     socket.on('disconnect', () => {
         nspStream.emit('onunload');
-        flagDisconnect = false;
+        // flagDisconnect = false;
     });
     socket.on('setDBStatus', objCrossLock => {
         refCrossLog.set(objCrossLock);
@@ -209,7 +207,13 @@ app.post('/calendar', (req, res) => {
         arrSensor.forEach(sensor => {
             if (qrLocat == sensor.val().location.address){
                 if (req.body.download) { res.status(201).send(sensor.val().logs); } // download request
-                else { res.status(202).send(sensor.val().logs); } // view request
+                // view request
+                else {
+                    res.status(202).send(sensor.val().logs);
+                    fs.readFile('views/' + qrLocat + '.html', (err, html) => {
+                        nspBrowser.emit('card', html.toString());
+                    });
+                }
             }
         });
     }).catch(err => console.log(err));

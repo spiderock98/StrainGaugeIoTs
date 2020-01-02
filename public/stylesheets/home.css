@@ -149,6 +149,10 @@ a {
   margin-left: 1rem;
 }
 
+.card-grid-space {
+	width: fit-content;
+}
+
 .info {
   font-size: 1.2em;
   display: flex;
