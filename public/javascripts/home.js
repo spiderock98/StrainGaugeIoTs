@@ -12,9 +12,11 @@ fieldDashboard.addEventListener('click', () => window.location.href = '/home');
 
 fieldDevices.addEventListener('click', () => window.location.href = '/devices');
 
+fieldUsers.addEventListener('click', () => window.location.href = '/users');
+
 btnLogout.addEventListener('click', () => window.location.href = '/login');
 
-// jQuery Form Plugin
+// jQuery Form Plugin ajax onlick submit
 // https://jquery-form.github.io/form/api/
 $(() => {
     var jsonData;
@@ -25,7 +27,6 @@ $(() => {
         statusCode: {
             201: () => {
                 console.log('201 download found');
-                // console.log(jsonData);
                 var userDate = new Date(qrLog.value);
                 var result = {};
                 var retArr = [];
@@ -132,21 +133,23 @@ function drawLine() {
     var chart = new google.visualization.AreaChart(document.getElementById('linechart'));
     chart.draw(data, options); // init
 
-    $.ajax('/calendar', {
-        method: 'POST',
-        async: false,
-        success: jsonData => {
-            var dbDate = new Date();
-            var sortDate = [];
-            for (var time in jsonData) {
-                dbDate.setTime(time);
-                sortDate.push([dbDate.toTimeString(), parseInt(jsonData[time])]);
-            }
-            data.addRows(sortDate);
-            chart.draw(data, options);
-        }
-    });
+    // ajax onload page
+    // $.ajax('/calendar', {
+    //     method: 'POST',
+    //     async: false,
+    //     success: jsonData => {
+    //         var dbDate = new Date();
+    //         var sortDate = [];
+    //         for (var time in jsonData) {
+    //             dbDate.setTime(time);
+    //             sortDate.push([dbDate.toTimeString(), parseInt(jsonData[time])]);
+    //         }
+    //         data.addRows(sortDate);
+    //         chart.draw(data, options);
+    //     }
+    // });
 
+    // on new log data 
     socketBrowser.on('cloudVal', (time, log) => {
         var d = new Date();
         d.setTime(time);
@@ -192,7 +195,7 @@ function initMap() {
     socketBrowser.once('dbInfo', (objID, objStatus, arrLocation) => {
         // console.log(objID); // {sensor1: "acer", sensor2: "raspi"}
         // console.log(objStatus); // {acer: "off", raspi: "on"}
-        // console.log(arrLocation); // [{x: 10.845806, y: 106.794524}, {x: 10.848621, y: 106.773583}]
+        // console.log(arrLocation); // [{address: gtvt, x: 10.845806, y: 106.794524}, {address: thuduc, x: 10.848621, y: 106.773583}]
         var arrMapDevice = [];
         var count = 0;
         for (const item in objID) {

@@ -64,4 +64,6 @@ fieldDashboard.addEventListener('click', function () { window.location.href = '/
 
 fieldDevices.addEventListener('click', function () { window.location.href = '/devices' });
 
+fieldUsers.addEventListener('click', () => window.location.href = '/users');
+
 btnLogout.addEventListener('click', function () { window.location.href = '/login'; });

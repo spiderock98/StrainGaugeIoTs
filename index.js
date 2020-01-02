@@ -51,27 +51,27 @@ firebase.initializeApp(firebaseConfig);
 var nspStream = io.of('/VideoStream');
 var nspBrowser = io.of('/Browser');
 // var nspEsp = io.of('/Esp8266');
-var refLog = firebase.database().ref('/sensor1/logs');
+// var refLog = firebase.database().ref('/sensor1/logs');
 var refCrossLog = firebase.database().ref('/crosslock');
 var reffilter_Sensor = firebase.database().ref().orderByKey().startAt('sens');
 
-refLog.on('child_added', snap => nspBrowser.emit('cloudVal', snap.key, snap.val()));
+// refLog.on('child_added', snap => nspBrowser.emit('cloudVal', snap.key, snap.val()));
 
 io.on('connection', socket => {
     socket.on('sensor', objData => {
         var MAC = Object.keys(objData).toString();
         reffilter_Sensor.once('value')
-        .then(arrSensor => {
-            arrSensor.forEach(sensor => {
-                if (MAC == sensor.val().MAC) {
-                    var update = {};
-                    var now = new Date();
-                    var refLOG = firebase.database().ref('/' + sensor.key + '/logs');
-                    update[now.getTime()] = objData[MAC];
-                    refLOG.update(update);
-                }
+            .then(arrSensor => {
+                arrSensor.forEach(sensor => {
+                    if (MAC == sensor.val().MAC) {
+                        var update = {};
+                        var now = new Date();
+                        var refLOG = firebase.database().ref('/' + sensor.key + '/logs');
+                        update[now.getTime()] = objData[MAC];
+                        refLOG.update(update);
+                    }
+                });
             });
-        });  
     });
 });
 
@@ -89,9 +89,18 @@ nspStream.on('connection', socket => {
     });
 });
 
+var flagDisconnect;
+// var i = 0;
 // When home.ejs has been rendered
 nspBrowser.on('connection', socket => {
-    socket.on('disconnect', () => nspStream.emit('onunload'));
+    // setTimeout(() => {
+
+    // }, 3000);
+    flagDisconnect = true;
+    socket.on('disconnect', () => {
+        nspStream.emit('onunload');
+        flagDisconnect = false;
+    });
     socket.on('setDBStatus', objCrossLock => {
         refCrossLog.set(objCrossLock);
     });
@@ -115,18 +124,18 @@ nspBrowser.on('connection', socket => {
         var objStatus = {};
         refCrossLog.on('value', snap => {
             console.log(snap.val());
-            
+
             nspStream.emit('crosslock', snap.val());
             objStatus = snap.val();
             socket.emit('dbInfo', objID, objStatus, arrLocation);
         });
-        
+
 
         // refCrossLog.on('value', snap => {
         //     nspStream.emit('crosslock', snap.val());
         //     objStatus = snap.val();
         // });
-        
+
         // setTimeout(() => {
         //     console.log(objStatus);
         //     socket.emit('dbInfo', objID, objStatus, arrLocation);
@@ -161,6 +170,10 @@ firebase.auth().onAuthStateChanged(user => {
     app.get('/devices', (req, res) => {
         if (this.user) { res.render('devices'); }
     });
+
+    app.get('/users', (req, res) => {
+        if (this.user) { res.render('users'); }
+    });
 });
 
 // Route logout
@@ -169,11 +182,45 @@ app.get('/login', (req, res) => {
     res.render('login');
 });
 
+var qrLocat;
+
+reffilter_Sensor.once('value')
+.then(arrSensor => {
+    arrSensor.forEach(sensor => {
+        firebase.database().ref('/' + sensor.key + '/logs').on('child_added', snap => {
+            if (qrLocat == sensor.val().location.address){
+                nspBrowser.emit('cloudVal', snap.key, snap.val());
+                // console.log(snap.val());
+            }
+        });
+    });
+}).catch(err => console.log(err));
+
 app.post('/calendar', (req, res) => {
-    if (req.body.download) {
-        refLog.once('value', snap => { res.status(201).send(snap.val()); });
-    }
-    else {
-        refLog.once('value', snap => { res.status(202).send(snap.val()); });
-    }
+    
+    // if (req.body.download) {
+    //     firebase.database().ref('/sensor1/logs').once('value', snap => { res.status(202).send(snap.val()); });
+    // }
+    
+    // else {
+    qrLocat = req.body.locatCombobox;
+    reffilter_Sensor.once('value')
+    .then(arrSensor => {
+        arrSensor.forEach(sensor => {
+            if (qrLocat == sensor.val().location.address){
+                if (req.body.download) { res.status(201).send(sensor.val().logs); } // download request
+                else { res.status(202).send(sensor.val().logs); } // view request
+            }
+        });
+    }).catch(err => console.log(err));
+    // }
 });
+
+// app.post('/combo', (req, res) => {
+//     if (req.body.download) {
+//         refLog.once('value', snap => { res.status(201).send(snap.val()); });
+//     }
+//     else {
+//         refLog.once('value', snap => { res.status(202).send(snap.val()); });
+//     }
+// });
