@@ -11,7 +11,7 @@ var socketBrowser = io('/Browser');
 
 fieldDashboard.addEventListener('click', () => window.location.href = '/home');
 
-fieldDevices.addEventListener('click', () => window.location.href = '/devices');
+// fieldDevices.addEventListener('click', () => window.location.href = '/devices');
 
 fieldUsers.addEventListener('click', () => window.location.href = '/users');
 
@@ -203,9 +203,9 @@ function initMap() {
 
     // Refreshing
     socketBrowser.once('dbInfo', (objID, objStatus, arrLocation) => {
-        // console.log(objID); // {sensor1: "acer", sensor2: "raspi"}
-        // console.log(objStatus); // {acer: "off", raspi: "on"}
-        // console.log(arrLocation); // [{address: gtvt, x: 10.845806, y: 106.794524}, {address: thuduc, x: 10.848621, y: 106.773583}]
+        console.log(objID); // {sensor1: "acer", sensor2: "raspi"}
+        console.log(objStatus); // {acer: "off", raspi: "on"}
+        console.log(arrLocation); // [{address: gtvt, x: 10.845806, y: 106.794524}, {address: thuduc, x: 10.848621, y: 106.773583}]
         var arrMapDevice = [];
         var count = 0;
         for (const item in objID) {
@@ -214,9 +214,8 @@ function initMap() {
         }
 
         arrMapDevice.forEach(device => {
-            console.log(device);
-            
             google.maps.event.addListener(device.getMarker, 'click', () => {
+                // console.log(device);
                 map.setZoom(15);
                 device.getMarker.setClickable(false);
                 device.getInfoWindow.open(map, device.getMarker);
@@ -227,7 +226,7 @@ function initMap() {
 
                 // if click when dbStatus is ON => first click onload
                 if (device.getStatus == 'off') {
-                    // SWAP status then write to DB using objStatus
+                    // SWAP status locally then write to DB using objStatus for next reload
                     arrMapDevice.forEach(element => {
                         if (element.getStatus == 'on') {
                             element.getMarker.setClickable(true);

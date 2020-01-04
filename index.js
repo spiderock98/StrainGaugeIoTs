@@ -90,14 +90,14 @@ nspStream.on('connection', socket => {
     });
 });
 
-// var flagDisconnect;
-// var i = 0;
+
+
 // When home.ejs has been rendered
 nspBrowser.on('connection', socket => {
-    // flagDisconnect = true;
     socket.on('disconnect', () => {
         nspStream.emit('onunload');
-        // flagDisconnect = false;
+        refCrossLog.off();
+        reffilter_Sensor.off();
     });
     socket.on('setDBStatus', objCrossLock => {
         refCrossLog.set(objCrossLock);
@@ -122,12 +122,18 @@ nspBrowser.on('connection', socket => {
         var objStatus = {};
         refCrossLog.on('value', snap => {
             console.log(snap.val());
-
             nspStream.emit('crosslock', snap.val());
             objStatus = snap.val();
             socket.emit('dbInfo', objID, objStatus, arrLocation);
         });
+        
 
+        
+
+        // setInterval(() => {
+        //     
+        // }, 1000);
+        
 
         // refCrossLog.on('value', snap => {
         //     nspStream.emit('crosslock', snap.val());
@@ -143,13 +149,11 @@ nspBrowser.on('connection', socket => {
 
 // Web Routing
 app.get('/', (req, res) => {
-    // res.render('login');
     res.redirect('/login');
     console.log('Welcome ' + req.connection.remoteAddress);
     // player.play('./facebook_messenger.mp3', function(err){if (err) throw err});
 });
 
-// wait for post auth
 app.post('/auth', (req, res) => {
     firebase.auth().signInWithEmailAndPassword(req.body.id, req.body.pass).then(() => {
         res.send('Access Granted');
@@ -162,12 +166,11 @@ firebase.auth().onAuthStateChanged(user => {
     this.user = user;
     app.get('/home', (req, res) => {
         if (this.user) { res.render('home', { userName: this.user.email }); }
-        // else { console.log('no more haha'); }
     });
     // Route devices
-    app.get('/devices', (req, res) => {
-        if (this.user) { res.render('devices'); }
-    });
+    // app.get('/devices', (req, res) => {
+    //     if (this.user) { res.render('devices'); }
+    // });
 
     app.get('/users', (req, res) => {
         if (this.user) { res.render('users'); }
@@ -195,12 +198,6 @@ reffilter_Sensor.once('value')
 }).catch(err => console.log(err));
 
 app.post('/calendar', (req, res) => {
-    
-    // if (req.body.download) {
-    //     firebase.database().ref('/sensor1/logs').once('value', snap => { res.status(202).send(snap.val()); });
-    // }
-    
-    // else {
     qrLocat = req.body.locatCombobox;
     reffilter_Sensor.once('value')
     .then(arrSensor => {
@@ -217,14 +214,93 @@ app.post('/calendar', (req, res) => {
             }
         });
     }).catch(err => console.log(err));
-    // }
 });
 
-// app.post('/combo', (req, res) => {
-//     if (req.body.download) {
-//         refLog.once('value', snap => { res.status(201).send(snap.val()); });
-//     }
-//     else {
-//         refLog.once('value', snap => { res.status(202).send(snap.val()); });
-//     }
+// let demo = new Promise((resolve, reject) => {
+//     let arrLocation = [];
+//     let objID = {};
+//     let objStatus = new Object();
+
+//     reffilter_Sensor.once('value')
+//     .then(arrSensor => {
+//         arrSensor.forEach(sensor => {
+//             objID[sensor.key] = sensor.val().camera.id
+//         });
+//     })
+//     .then(refCrossLog.once('value')
+//     .then(snap => {
+//         // nspStream.emit('crosslock', snap.val());
+//         // objStatus = snap.val();
+//         Object.assign(objStatus, snap.val());
+//         // console.log(objStatus);
+//         // console.log(snap.val());
+        
+//         // socket.emit('dbInfo', objID, objStatus, arrLocation);
+//     }))
+//     .then(reffilter_Sensor.once('value')
+//     .then(arrSensor => {
+//         arrSensor.forEach(sensor => {
+//             firebase.database().ref('/' + sensor.key + '/location').once('value', location => {
+//                 arrLocation.push(location.val());
+//             });
+//         });
+//     }))
+//     .then(resolve({objID, objStatus, arrLocation}))
 // });
+// ////////////////////////
+// let demo3 = new Promise((resolve, reject) => {
+//     let arrLocation = [];
+//     let objID = {};
+//     let objStatus = new Object();
+
+//     reffilter_Sensor.once('value')
+//     .then(arrSensor => {
+//         arrSensor.forEach(sensor => {
+//             objID[sensor.key] = sensor.val().camera.id
+//         });
+//         return refCrossLog.once('value')
+//     })
+//     .then(snap => {
+//         Object.assign(objStatus, snap.val());
+//         return reffilter_Sensor.once('value')
+//     })
+//     .then(arrSensor => {
+//         arrSensor.forEach(sensor => {
+//             firebase.database().ref('/' + sensor.key + '/location').once('value', location => {
+//                 arrLocation.push(location.val());
+//             });
+//         });
+//     })
+//     .then(resolve({objID, objStatus, arrLocation}))
+// });
+// // demo3.then(msg => console.log(msg));
+
+// ////////////////////
+// async function demo2() {
+//     const LOCAT = await reffilter_Sensor.once('value')
+//     .then(arrSensor => {
+//         let arrLocation = [];
+//         arrSensor.forEach(sensor => {
+//             firebase.database().ref('/' + sensor.key + '/location').once('value')
+//             .then(location => {
+//                 arrLocation.push(location.val());
+//             });
+//         });
+//         return arrLocation
+//     });
+
+//     const ID = await reffilter_Sensor.once('value')
+//     .then(arrSensor => {
+//         let objID = {};
+//         arrSensor.forEach(sensor => {
+//             objID[sensor.key] = sensor.val().camera.id
+//         });
+//         return objID;
+//     });
+
+//     const STT = await refCrossLog.once('value')
+//     .then(snap => {
+//         // Object.assign(objStatus, snap.val());
+//         return snap.val();
+//     });
+// }

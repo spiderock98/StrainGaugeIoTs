@@ -1,5 +1,5 @@
 $('#fieldDashboard').click(() => window.location.href = '/home');
-$('#fieldDevices').click(() => { window.location.href = '/devices' });
+// $('#fieldDevices').click(() => { window.location.href = '/devices' });
 $('#fieldUsers').click(() => window.location.href = '/users');
 $('#btnLogout').click(() => window.location.href = '/login');
 

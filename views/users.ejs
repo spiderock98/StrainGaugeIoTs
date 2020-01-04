@@ -34,23 +34,25 @@
         </header>
         <ul>
             <li id="fieldDashboard" tabindex="0" class="icon-dashboard"><span>Map</span></li>
-            <li id="fieldDevices" tabindex="0" class="icon-customers"><span>Devices</span></li>
+            <!-- <li id="fieldDevices" tabindex="0" class="icon-customers" style="display: none;"><span>Devices</span></li> -->
             <li id="fieldUsers" tabindex="0" class="icon-users"><span>Users</span></li>
-            <li tabindex="0" class="icon-settings"><span>Settings</span></li>
+            <!-- <li tabindex="0" class="icon-settings" style="display: none;"><span>Settings</span></li> -->
         </ul>
     </nav>
     <main>
-        <select name="locatCombobox" form="formCal">
-            <option value="thuduc">Thủ Đức</option>
-            <option selected value="gtvt">Đại Học GTVT Phân Hiệu tại TP.HCM</option>
-            <option value="kcnc">Khu Công Nghệ Cao</option>
-        </select>
-        <!-- <div><input type="date" id="qrLog"></div> -->
-        <form id="formCal" action="/calendar" method="POST">
-            <input type="submit" name="showLog" value="View Log">
-            <input type="submit" name="download" value="Download .xlsx">
-            <input type="date" id="qrLog">
-        </form>
+        <div style="text-align: center;">
+            <select name="locatCombobox" form="formCal">
+                <option value="thuduc">Thủ Đức</option>
+                <option selected value="gtvt">Đại Học GTVT Phân Hiệu tại TP.HCM</option>
+                <option value="kcnc">Khu Công Nghệ Cao</option>
+            </select>
+            <!-- <div><input type="date" id="qrLog"></div> -->
+            <form id="formCal" action="/calendar" method="POST">
+                <input type="submit" name="showLog" value="View Log">
+                <input type="submit" name="download" value="Download .xlsx">
+                <input type="date" id="qrLog">
+            </form>
+        </div>
 
         <div id="linechart" style="margin: 50px;"></div>
 

@@ -120,6 +120,6 @@ def on_message():
 def disconnect():
     print('[INFO] Disconnected from server')
 
-# sio.connect('http://localhost:8080/', namespaces=['/VideoStream'])
-sio.connect('http://27.78.42.155:8080/', namespaces=['/VideoStream'])
+sio.connect('http://localhost:8080/', namespaces=['/VideoStream'])
+# sio.connect('http://27.78.42.155:8080/', namespaces=['/VideoStream'])
 sio.wait()
