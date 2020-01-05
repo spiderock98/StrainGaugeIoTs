@@ -52,11 +52,8 @@ firebase.initializeApp(firebaseConfig);
 var nspStream = io.of('/VideoStream');
 var nspBrowser = io.of('/Browser');
 // var nspEsp = io.of('/Esp8266');
-// var refLog = firebase.database().ref('/sensor1/logs');
 var refCrossLog = firebase.database().ref('/crosslock');
 var reffilter_Sensor = firebase.database().ref().orderByKey().startAt('sens');
-
-// refLog.on('child_added', snap => nspBrowser.emit('cloudVal', snap.key, snap.val()));
 
 io.on('connection', socket => {
     socket.on('sensor', objData => {
@@ -191,7 +188,6 @@ reffilter_Sensor.once('value')
         firebase.database().ref('/' + sensor.key + '/logs').on('child_added', snap => {
             if (qrLocat == sensor.val().location.address){
                 nspBrowser.emit('cloudVal', snap.key, snap.val());
-                // console.log(snap.val());
             }
         });
     });
@@ -204,7 +200,7 @@ app.post('/calendar', (req, res) => {
         arrSensor.forEach(sensor => {
             if (qrLocat == sensor.val().location.address){
                 if (req.body.download) { res.status(201).send(sensor.val().logs); } // download request
-                // view request
+                // view request from #btnViewLog or #btnToday
                 else {
                     res.status(202).send(sensor.val().logs);
                     fs.readFile('views/' + qrLocat + '.html', (err, html) => {

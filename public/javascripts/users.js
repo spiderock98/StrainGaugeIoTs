@@ -2,9 +2,16 @@ $('#fieldDashboard').click(() => window.location.href = '/home');
 // $('#fieldDevices').click(() => { window.location.href = '/devices' });
 $('#fieldUsers').click(() => window.location.href = '/users');
 $('#btnLogout').click(() => window.location.href = '/login');
+var qrLog = document.getElementById('qrLog');
+var combobox = document.getElementById('combobox');
 
 var socketBrowser = io('/Browser');
 
+$(document).ready(() => {
+    let today = new Date();
+    qrLog.value = today.toISOString().substr(0, 10);
+    $('#btnToday').click(() => qrLog.value = today.toISOString().substr(0, 10));
+});
 // onclick "view log"
 socketBrowser.on('card', (html) => {
     $("div.card-grid-space").replaceWith(html);
@@ -24,7 +31,7 @@ socketBrowser.on('card', (html) => {
             sttIcon.src = "/images/error.png";
         }
     };
-    
+
     document.getElementById('stt1Sw').onclick = () => {
         changeStatus(stt1Sw, stt1txt, stt1icon);
     };
@@ -41,14 +48,13 @@ $(() => {
         statusCode: {
             201: () => {
                 // console.log('201 download found');
-                var userDate = new Date(document.getElementById('qrLog').value);
-                var result = {};
-                var retArr = [];
+                let userDate = new Date(qrLog.value);
+                let result = {};
+                let retArr = [];
 
-                for (var time in jsonData) {
-                    var qrDate = new Date();
+                for (let time in jsonData) {
+                    let qrDate = new Date();
                     qrDate.setTime(time);
-
                     if ((qrDate.getDate() == userDate.getDate()) && (qrDate.getMonth() == userDate.getMonth())) {
                         result['time'] = qrDate;
                         result['sensor'] = jsonData[time];
@@ -65,13 +71,13 @@ $(() => {
                     // add sheet to workbook
                     XLSX.utils.book_append_sheet(wb, sheet, 'data');
                     // save wb
-                    XLSX.writeFile(wb, 'strain.xlsx');
+                    XLSX.writeFile(wb, combobox.value + '-' + qrLog.value + '.xlsx');
                 }
-                else { window.alert('Nothing to Download ...'); }
+                else { window.alert('No Logs on ' + qrLog.value); }
             },
             202: () => {
                 // console.log('202 log area found');
-                google.charts.load('current', { 'packages': ['corechart'] });
+                google.charts.load('current', { packages: ['corechart'] });
                 google.charts.setOnLoadCallback(drawLine);
 
                 function drawLine() {
@@ -81,9 +87,9 @@ $(() => {
                     ]);
 
                     var options = {
-                        title: 'Logs Table',
+                        title: 'Logs Table ' + combobox.value,
                         chartArea: { width: '90%' },
-                        animation: { "startup": true, duration: 1000, easing: 'out' },
+                        animation: { startup: true, duration: 1000, easing: 'out' },
 
                         pointSize: 2,
                         hAxis: { title: 'Time', titleTextStyle: { color: '#333' } },
@@ -91,28 +97,39 @@ $(() => {
                         style: { 'fill-color': '#a52714' },
                         // point: { size: 2, shape-type: 'star', fill-color: 'fill-color', }
                     };
-                    
+
                     var chart = new google.visualization.AreaChart(document.getElementById('linechart'));
                     chart.draw(data, options); // init
 
-                    var dbDate = new Date();
-                    var sortDate = [];
-                    for (var time in jsonData) {
-                        dbDate.setTime(time);
-                        sortDate.push([dbDate.toTimeString(), parseInt(jsonData[time])]);
+                    // var dbDate = new Date();
+                    // var sortDate = [];
+                    // for (var time in jsonData) {
+                    //     dbDate.setTime(time);
+                    //     // sortDate.push([dbDate.toISOString(), parseInt(jsonData[time])]);
+                    //     // sortDate.push([dbDate.toTimeString(), parseInt(jsonData[time])]);
+                    //     sortDate.push([dbDate.toLocaleTimeString(), parseInt(jsonData[time])]);
+                    // }
+
+                    let userDate = new Date(qrLog.value);
+                    let sortDate = [];
+                    let qrDate = new Date();
+
+                    for (let time in jsonData) {
+                        qrDate.setTime(time);
+                        if ((qrDate.getDate() == userDate.getDate()) && (qrDate.getMonth() == userDate.getMonth())) {
+                            sortDate.push([qrDate.toLocaleTimeString(), parseInt(jsonData[time])]);
+                        }
                     }
                     data.addRows(sortDate);
                     chart.draw(data, options);
 
                     // on new log data 
                     socketBrowser.on('cloudVal', (time, log) => {
-                        // console.log('seen');
-                        
                         var d = new Date();
                         d.setTime(time);
 
                         data.addRows([
-                            [d.toTimeString(), parseInt(log)]
+                            [d.toLocaleTimeString(), parseInt(log)]
                         ]);
                         chart.draw(data, options);
                     });

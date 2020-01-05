@@ -203,9 +203,9 @@ function initMap() {
 
     // Refreshing
     socketBrowser.once('dbInfo', (objID, objStatus, arrLocation) => {
-        console.log(objID); // {sensor1: "acer", sensor2: "raspi"}
-        console.log(objStatus); // {acer: "off", raspi: "on"}
-        console.log(arrLocation); // [{address: gtvt, x: 10.845806, y: 106.794524}, {address: thuduc, x: 10.848621, y: 106.773583}]
+        // console.log(objID); // {sensor1: "acer", sensor2: "raspi"}
+        // console.log(objStatus); // {acer: "off", raspi: "on"}
+        // console.log(arrLocation); // [{address: gtvt, x: 10.845806, y: 106.794524}, {address: thuduc, x: 10.848621, y: 106.773583}]
         var arrMapDevice = [];
         var count = 0;
         for (const item in objID) {
