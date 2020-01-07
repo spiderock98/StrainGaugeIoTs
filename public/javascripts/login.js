@@ -73,8 +73,12 @@ btnLogin.addEventListener('click', function(){
             pass: String(txtPassword.value)
         }),
         success: function(result,status){
-            // window.alert(result);
-            window.location.href = '/home';
+            if (result == 'Access Granted'){
+                swal('Access Granted', "", "success").then(() => window.location.href = '/home');
+            }
+            else {
+                swal('Access Denied', result, "error")
+            }
         }
     });
 });

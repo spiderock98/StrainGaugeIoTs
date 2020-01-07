@@ -12,7 +12,7 @@ $(document).ready(() => {
     qrLog.value = today.toISOString().substr(0, 10);
     $('#btnToday').click(() => qrLog.value = today.toISOString().substr(0, 10));
 });
-// onclick "view log"
+// onclick "view log" or Today
 socketBrowser.on('card', (html) => {
     $("div.card-grid-space").replaceWith(html);
     // document.getElementById('tbInfo').style = "display: inline;";
@@ -73,7 +73,7 @@ $(() => {
                     // save wb
                     XLSX.writeFile(wb, combobox.value + '-' + qrLog.value + '.xlsx');
                 }
-                else { window.alert('No Logs on ' + qrLog.value); }
+                else {  swal('No Logs To View ', qrLog.value, "warning"); }
             },
             202: () => {
                 // console.log('202 log area found');
@@ -149,7 +149,7 @@ $(() => {
                 //         dashboard.draw(data);
                 //     });
                 // }
-                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////                
                 function drawLine() {
                     var rangeFilter = new google.visualization.ControlWrapper({
                         controlType: 'ChartRangeFilter',
@@ -225,7 +225,7 @@ $(() => {
                         chart.draw(data, options);
                     });
                 }
-                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////                
                 // function drawLine() {
                 //     var data = google.visualization.arrayToDataTable([
                 //         ['Time', 'Sensor Values'],
