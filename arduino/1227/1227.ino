@@ -41,14 +41,16 @@ void loop() {
     previousMillis = millis();
     
     randVal = random(2000,5000);
-    //if (randVal > 2500){
+    if (randVal > 2500){
+      client.send("sensor", MAC, String(randVal));
+    }
       
-    if (Serial.available() > 0) {
+    /*if (Serial.available() > 0) {
       if (Serial.read() == 'a' ){
         Serial.println(randVal);
         client.send("sensor", MAC, String(randVal));
       }
-    }
+    }*/
   }
 
   if (!client.connected()) {

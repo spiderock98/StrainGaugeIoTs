@@ -25,3 +25,10 @@ table {
     align-content: center;
     float: right;
 } */
+
+/* #linechart {
+  overflow-x: scroll; 
+  overflow-y: hidden;     
+  width: 500px;
+  height: 550px;
+} */
