@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="stylesheets/switch.css">
     <link rel="stylesheet" href="stylesheets/users.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
     <title>Users</title>
 
@@ -41,28 +43,44 @@
         </ul>
     </nav>
     <main>
-        <div style="text-align: center;">
-            <select id="combobox" name="locatCombobox" form="formCal">
+        <div class="input-group input-group-lg">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="inputGroupSelect01"><i class="fas fa-map-marked-alt"> Address</i></label>
+            </div>
+            <select class="custom-select" id="combobox" name="locatCombobox" form="formCal">
+                <option selected>Choose...</option>
+                <option value="gtvt">Đại Học GTVT Phân Hiệu tại TP.HCM</option>
                 <option value="thuduc">Thủ Đức</option>
-                <option selected value="gtvt">Đại Học GTVT Phân Hiệu tại TP.HCM</option>
                 <option value="kcnc">Khu Công Nghệ Cao</option>
             </select>
-            <!-- <div><input type="date" id="qrLog"></div> -->
-            <form id="formCal" action="/calendar" method="POST">
-                <input type="submit" name="showLog" value="View Log">
-                <input type="date" id="qrLog">
-                <button id="btnToday">Today</button>
-                <div><input type="submit" name="download" value="Download .xlsx"></div>
-            </form>  
         </div>
 
+
+        <form id="formCal" action="/calendar" method="POST">
+            <div class="input-group input-group-lg">
+                <div class="input-group-prepend">
+                    <input class="btn btn-outline-success" type="submit" name="showLog" value="View Log">
+                </div>
+                <input class="form-control" type="date" id="qrLog">
+                <div class="input-group-prepend">
+                    <button class="btn btn-outline-info" id="btnToday">
+                        <i class="far fa-calendar-alt"> Today</i>
+                    </button>
+                </div>
+            </div>
+            <div>
+                <input style="display: inline;" class="btn btn-primary btn-lg btn-block" type="submit" name="download" value="Download .xlsx">
+            </div>
+        </form>
+
+
         <div id="dashboard" style="margin: 50px;">
-            <div id="linechart" ></div>
+            <div id="linechart"></div>
             <div id="filter-range"></div>
         </div>
 
-        <div class="card-grid-space" style="display: inline;" ></div>
-            <!-- <table id="tbInfo" style="display: none;">
+        <div class="card-grid-space" style="display: inline;"></div>
+        <!-- <table id="tbInfo" style="display: none;">
             <tr>
                 <th>Sensor ID</th>
                 <td>sensor1</td>
