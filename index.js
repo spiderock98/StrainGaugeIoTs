@@ -1,5 +1,5 @@
-var express = require('express')
-var bodyParser = require('body-parser')
+var express = require('express');
+var bodyParser = require('body-parser');
 
 var app = express();
 app.use(express.static('public'));
@@ -29,14 +29,13 @@ const fs = require('fs');
 server.listen(8080);
 // server.listen(process.env.PORT || 8080); 
 
-var serviceAccount = require("./streamopencv-firebase-adminsdk-1m2qi-a0f9a36b01.json");
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(require("./streamopencv-firebase-adminsdk-1m2qi-a0f9a36b01.json")),
     databaseURL: "https://streamopencv.firebaseio.com"
 });
 
-// Your web app's Firebase configuration
-var firebaseConfig = {
+// Initialize Firebase
+firebase.initializeApp({
     apiKey: "AIzaSyAgb7aS-JDiAqldfh-9kx247333P2VsIPk",
     authDomain: "streamopencv.firebaseapp.com",
     databaseURL: "https://streamopencv.firebaseio.com",
@@ -45,9 +44,7 @@ var firebaseConfig = {
     messagingSenderId: "799475033788",
     appId: "1:799475033788:web:356bbc071b9b50c63452b9",
     measurementId: "G-7JYQ524WQY"
-};
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+});
 
 var nspStream = io.of('/VideoStream');
 var nspBrowser = io.of('/Browser');
@@ -55,6 +52,7 @@ var nspBrowser = io.of('/Browser');
 var refCrossLog = firebase.database().ref('/crosslock');
 var reffilter_Sensor = firebase.database().ref().orderByKey().startAt('sens');
 
+// esp
 io.on('connection', socket => {
     socket.on('sensor', objData => {
         var MAC = Object.keys(objData).toString();
@@ -86,8 +84,6 @@ nspStream.on('connection', socket => {
         });
     });
 });
-
-
 
 // When home.ejs has been rendered
 nspBrowser.on('connection', socket => {
@@ -123,14 +119,11 @@ nspBrowser.on('connection', socket => {
             objStatus = snap.val();
             socket.emit('dbInfo', objID, objStatus, arrLocation);
         });
-        
-
-        
 
         // setInterval(() => {
         //     
         // }, 1000);
-        
+
 
         // refCrossLog.on('value', snap => {
         //     nspStream.emit('crosslock', snap.val());
@@ -183,33 +176,33 @@ app.get('/login', (req, res) => {
 var qrLocat;
 
 reffilter_Sensor.once('value')
-.then(arrSensor => {
-    arrSensor.forEach(sensor => {
-        firebase.database().ref('/' + sensor.key + '/logs').on('child_added', snap => {
-            if (qrLocat == sensor.val().location.address){
-                nspBrowser.emit('cloudVal', snap.key, snap.val());
-            }
+    .then(arrSensor => {
+        arrSensor.forEach(sensor => {
+            firebase.database().ref('/' + sensor.key + '/logs').on('child_added', snap => {
+                if (qrLocat == sensor.val().location.address) {
+                    nspBrowser.emit('cloudVal', snap.key, snap.val());
+                }
+            });
         });
-    });
-}).catch(err => console.log(err));
+    }).catch(err => console.log(err));
 
 app.post('/calendar', (req, res) => {
     qrLocat = req.body.locatCombobox;
     reffilter_Sensor.once('value')
-    .then(arrSensor => {
-        arrSensor.forEach(sensor => {
-            if (qrLocat == sensor.val().location.address){
-                if (req.body.download) { res.status(201).send(sensor.val().logs); } // download request
-                // view request from #btnViewLog or #btnToday
-                else {
-                    res.status(202).send(sensor.val().logs);
-                    fs.readFile('views/' + qrLocat + '.html', (err, html) => {
-                        nspBrowser.emit('card', html.toString());
-                    });
+        .then(arrSensor => {
+            arrSensor.forEach(sensor => {
+                if (qrLocat == sensor.val().location.address) {
+                    if (req.body.download) { res.status(201).send(sensor.val().logs); } // download request
+                    // view request from #btnViewLog or #btnToday
+                    else {
+                        res.status(202).send(sensor.val().logs);
+                        fs.readFile('views/' + qrLocat + '.html', (err, html) => {
+                            nspBrowser.emit('card', html.toString());
+                        });
+                    }
                 }
-            }
-        });
-    }).catch(err => console.log(err));
+            });
+        }).catch(err => console.log(err));
 });
 
 // let demo = new Promise((resolve, reject) => {
@@ -230,7 +223,7 @@ app.post('/calendar', (req, res) => {
 //         Object.assign(objStatus, snap.val());
 //         // console.log(objStatus);
 //         // console.log(snap.val());
-        
+
 //         // socket.emit('dbInfo', objID, objStatus, arrLocation);
 //     }))
 //     .then(reffilter_Sensor.once('value')

@@ -45,16 +45,16 @@
     <main>
         <div class="input-group input-group-lg">
             <div class="input-group-prepend">
-                <label class="input-group-text" for="inputGroupSelect01"><i class="fas fa-map-marked-alt"> Address</i></label>
+                <label class="input-group-text" for="inputGroupSelect01"><i class="fas fa-map-marked-alt">
+                        Address</i></label>
             </div>
-            <select class="custom-select" id="combobox" name="locatCombobox" form="formCal">
-                <option selected>Choose...</option>
+            <select required class="custom-select" id="combobox" name="locatCombobox" form="formCal">
+                <option selected value="">Choose ...</option>
                 <option value="gtvt">Đại Học GTVT Phân Hiệu tại TP.HCM</option>
                 <option value="thuduc">Thủ Đức</option>
                 <option value="kcnc">Khu Công Nghệ Cao</option>
             </select>
         </div>
-
 
         <form id="formCal" action="/calendar" method="POST">
             <div class="input-group input-group-lg">
@@ -69,7 +69,8 @@
                 </div>
             </div>
             <div>
-                <input style="display: inline;" class="btn btn-primary btn-lg btn-block" type="submit" name="download" value="Download .xlsx">
+                <input style="display: inline;" class="btn btn-primary btn-lg btn-block" type="submit" name="download"
+                    value="Download .xlsx">
             </div>
         </form>
 

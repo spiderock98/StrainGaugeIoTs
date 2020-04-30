@@ -215,7 +215,6 @@ function initMap() {
 
         arrMapDevice.forEach(device => {
             google.maps.event.addListener(device.getMarker, 'click', () => {
-                // console.log(device);
                 map.setZoom(15);
                 device.getMarker.setClickable(false);
                 device.getInfoWindow.open(map, device.getMarker);
@@ -249,7 +248,7 @@ function initMap() {
             });
         });
     });
-    
+
 
     // socketBrowser.once('location', arrLocation => {
     //     for (var index in arrLocation) {

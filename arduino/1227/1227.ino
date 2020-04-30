@@ -2,22 +2,24 @@
 #include <SocketIOClient.h>
 
 SocketIOClient client;
-const char* ssid = "VIETTEL";
-const char* password = "Sherlock2211vtag";
+const char *ssid = "VIETTEL";
+const char *password = "Sherlock21vtag";
 
-char host1[] = "27.78.42.155";
-//char host1[] = "192.168.1.164";
-int port = 8080;
+char HOST[] = "116.102.7.90";
+//char HOST[] = "192.168.1.3";
+int PORT = 8080;
 unsigned long randVal = 0;
 long long previousMillis = 0;
-String MAC ;
+String MAC;
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   delay(500);
-  
+
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) { //Thoát ra khỏi vòng 
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.print('.');
   }
@@ -26,35 +28,39 @@ void setup() {
   MAC = WiFi.macAddress();
   Serial.print(MAC);
 
-  if (!client.connect(host1, port)) {
-    Serial.println("Failed to connect to host1");
+  if (!client.connect(HOST, PORT))
+  {
+    Serial.println("Failed to connect to HOST");
     return;
   }
-  
-  if (client.connected()) {
-    Serial.println("Succesful connected to host1");
+
+  if (client.connected())
+  {
+    Serial.println("Succesful connected to HOST");
   }
 }
 
-void loop() {
-  if (millis() - previousMillis > 1000) {
+void loop()
+{
+  if (millis() - previousMillis > 3000)
+  {
     previousMillis = millis();
-    
-    randVal = random(2000,5000);
-    if (randVal > 2500){
-      client.send("sensor", MAC, String(randVal));
-    }
-      
+
+    randVal = random(0, 5000);
+    client.send("sensor", MAC, String(randVal));
+    //    if (randVal > 2500)
+    //    {
+    //      client.send("sensor", MAC, String(randVal));
+    //    }
+
     /*if (Serial.available() > 0) {
       if (Serial.read() == 'a' ){
         Serial.println(randVal);
         client.send("sensor", MAC, String(randVal));
       }
-    }*/
+      }*/
   }
 
-  if (!client.connected()) {
-    //Serial.println("Attemping to reconnect ...");
-    client.reconnect(host1, port);
-  }
+  if (!client.connected())
+    client.reconnect(HOST, PORT);
 }
